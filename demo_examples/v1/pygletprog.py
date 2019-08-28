@@ -228,7 +228,10 @@ class WorldMap(object):
         matrixProjection = glGetDoublev(GL_PROJECTION_MATRIX)
         #print ('coordinates mouse are', x, y)
         #print ('Coordinates at cursor are', x, viewport[3] - float(y) - 1)
-        realy = viewport[3] - float(y) - 1;
+        
+        #realy = viewport[3] - float(y) - 1;
+        realy = y
+        
         #print ('World coords at z=0 are', gluUnProject(x, realy, 0, matrixModelView, matrixProjection, viewport))
         #print ('World coords at z=1 are', gluUnProject(x, realy, 1, matrixModelView, matrixProjection, viewport))
         p = []
