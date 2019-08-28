@@ -15,7 +15,7 @@ random.seed(7337)
 
 sys.path.append("./libs")
 #sys.path.insert(0, "./db")
-from db import *
+#from db import *
 
 from objloader import *
 #from objloader_dbload import *
