@@ -64,3 +64,7 @@ def ray_intersect_triangle(p0, p1, triangle):
         return 2
     return 1
     
+    
+
+
+

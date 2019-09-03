@@ -39,6 +39,7 @@ def generate_obj_matrix(winpg):
     glColor3f(0.0, 0.0, 0.0)
     for row in cur.fetchall():
         glPushMatrix()
+        
         str1 = row['fixobj']
 
         if str1 != None:

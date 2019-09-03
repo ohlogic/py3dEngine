@@ -8,6 +8,8 @@
 
 import pyglet
 from pyglet.gl import *
+#from OpenGL.GL import *
+#from OpenGL.GLU import *
 
 import sys
 import math
@@ -29,6 +31,10 @@ from objloader_dbload import *
 from printfuncs import *
 from algorithms import *
 
+from noise import pnoise2
+
+terrain  = {}
+
 class WorldMap(object):
     def __init__(self):
         super().__init__()
@@ -44,14 +50,15 @@ class WorldMap(object):
         generate_obj_matrix( window ) # dynamic creation of n objects
 
 
-
 class WinPygletGame(pyglet.window.Window):
 
     def __init__(self, refreshrate=240, *args, **kwargs):
         super(WinPygletGame, self).__init__(*args, **kwargs)
+        
         self.refreshrate = refreshrate
         self.angle = 0
-        
+        texturefile = "./textures/brick.png"
+        self.texture = pyglet.image.load(texturefile).get_texture()
         #glClearColor(0.5, 0.69, 1.0, 1)
         glClearColor(0.902, 0.902, 1, 0.0)
         
@@ -95,6 +102,10 @@ class WinPygletGame(pyglet.window.Window):
         self.text = None
         
         
+        self.terrain_once = True
+        
+
+        
         pyglet.clock.schedule_interval(self.update, 1/refreshrate)
         
         
@@ -112,7 +123,7 @@ class WinPygletGame(pyglet.window.Window):
         
         
     def get_mouseclick_id(self, x, y):
-        self.set_3d(clear=False)
+        self.set_3d()
         
         selectbuffer = 10000
         #bufferints = (ctypes.c_uint*selectbuffer)()
@@ -148,7 +159,7 @@ class WinPygletGame(pyglet.window.Window):
 
 
     def on_mouse_press(self, x, y, button, modifiers):
-
+        
         global start_x, start_y
         if button == pyglet.window.mouse.LEFT:
             self.get_mouseclick_id(x, y)
@@ -157,7 +168,7 @@ class WinPygletGame(pyglet.window.Window):
         elif button == pyglet.window.mouse.MIDDLE:
 
             self.text = pyglet.text.HTMLLabel(
-                '<font face="Times New Roman" size="4">Hello, <i>world</i></font>',
+                '<font face="Times New Roman" size="4">Hello, <i>World</i></font>',
                 x=x, y=y,
                 anchor_x='center', anchor_y='center')
             
@@ -171,7 +182,7 @@ class WinPygletGame(pyglet.window.Window):
             self.rotate = False
             update_rotate_vals(self.oo)
 
-            self.set_3d(clear=False)
+            self.set_3d()
             self.storeit = self.mouseLeftClick(x, y)
             v = ray_intersect_triangle(np.array(self.storeit[0]), np.array(self.storeit[1]), \
                 np.array([[ 0.0, 1.0, 0.0], [-1.0,-1.0, 0.0],[ 1.0,-1.0, 0.0]]) )
@@ -186,7 +197,8 @@ class WinPygletGame(pyglet.window.Window):
 
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-
+        self.clear()
+        
         if buttons & pyglet.window.mouse.LEFT:
             i = x
             j = y
@@ -200,7 +212,9 @@ class WinPygletGame(pyglet.window.Window):
             if self.move:
                 self.oo.tx = float(self.oo.tx) + float(i)/20.
                 self.oo.ty = float(self.oo.ty) + float(j)/20.
-
+        
+        self.terrain_once = True
+        
     def on_mouse_motion(self, x, y, dx, dy):
         pass
         
@@ -230,6 +244,8 @@ class WinPygletGame(pyglet.window.Window):
         
     def on_key_press(self, symbol, modifiers):
 
+        self.clear()
+
         if symbol == pyglet.window.key.UP:
 
             self.move_up(10)
@@ -254,31 +270,36 @@ class WinPygletGame(pyglet.window.Window):
             if self.selected_obj >= len(self.map.objs):
                 self.selected_obj = 0
             self.oo = self.map.objs[self.selected_obj]
-
+        
+        self.terrain_once = True
+        
     def fullRotate(self, direction):
-    
+
         for i in range(0, 36):
+            self.clear()
+            self.terrain_once = True
+
             if direction == 'left':
                 self.angle += 10
                 self.move_left(10)
             else:
                 self.angle -= 10
                 self.move_right(10)
-            self.set_3d()
-            self.map.draw_objs(self)
-            self.dispatch_events()
+            self.on_draw()
             time.sleep(.1)
             self.flip()
-
+            
             
     def on_draw(self):
-        self.clear()
+        global terrain
+    
+        #self.clear()
         self.set_3d()
         glColor3d(1, 1, 1)
         
         self.map.draw_objs(self)
         
-        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) #to go back to normal from wire mesh mode
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) #remove wiremesh mode
         
         glut_print(0, self.height-10, self.oo.name)
         
@@ -286,7 +307,7 @@ class WinPygletGame(pyglet.window.Window):
 
             glPushMatrix()
             #glLineWidth(2.5)
-            glColor3f(1.0, 0.0, 0.0)
+            #glColor3f(1.0, 0.0, 0.0)
             q1, q2 = self.storeit
 
             glMatrixMode(GL_MODELVIEW)
@@ -298,23 +319,155 @@ class WinPygletGame(pyglet.window.Window):
             glEnd()
             glPopMatrix()
 
+
+
         glPushMatrix()
-        glColor3f(1.0, 0.0, 0.0)
+        glEnable(GL_TEXTURE_2D)
+        #glColor3f(1.0, 0.0, 0.0)
+        glBindTexture(GL_TEXTURE_2D, self.texture.id)
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
         glBegin(GL_TRIANGLES);            #          // Drawing Using Triangles
-        glVertex3f( 0.0, 1.0, 0.0);       #       // Top
-        glVertex3f(-1.0,-1.0, 0.0);       #       // Bottom Left
-        glVertex3f( 1.0,-1.0, 0.0);       #        // Bottom Right
+        glTexCoord2f(0,0);
+        glVertex2f(0,1);
+        glTexCoord2f(.5,0);
+        glVertex2f(-1,-1);
+        glTexCoord2f(.5,.5);
+        glVertex2f(1,-1);
         glEnd();                          # ;//end drawing of triangles
+        glDisable(GL_TEXTURE_2D)
         glPopMatrix()
+        
+        
+        
+        glPushMatrix()
+        glEnable(GL_TEXTURE_2D)
+        glTranslatef(5, 5, 0)
+        glBindTexture (GL_TEXTURE_2D, self.texture.id);
+        glBegin (GL_QUADS);
+        glTexCoord2f (0.0, 0.0);
+        glVertex3f (0.0, 0.0, 0.0);
+        glTexCoord2f (.5, 0.0);
+        glVertex3f (10.0, 0.0, 0.0);
+        glTexCoord2f (.5, .5);
+        glVertex3f (10.0, 10.0, 0.0);
+        glTexCoord2f (0.0, .5);
+        glVertex3f (0.0, 10.0, 0.0);
+        glEnd ();
+        glDisable(GL_TEXTURE_2D)
+        glPopMatrix()
+        
+        
+        
+        glPushMatrix()
+        glTranslatef(5, -5, 0)
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, self.texture.id)
+        glBegin(GL_POLYGON) #// three
+        glTexCoord2f(0.25,0.50); glVertex3f(-1.0, 1.0, 1.0)
+        glTexCoord2f(0.25,0.25); glVertex3f(-1.0,-1.0, 1.0)
+        glTexCoord2f(0.50,0.25); glVertex3f( 1.0,-1.0, 1.0)
+        glTexCoord2f(0.50,0.50); glVertex3f( 1.0, 1.0, 1.0)
+        glEnd()
+
+        glBegin(GL_POLYGON) #// five
+        glTexCoord2f(0.00,0.50); glVertex3f(-1.0, 1.0,-1.0)
+        glTexCoord2f(0.00,0.25); glVertex3f(-1.0,-1.0,-1.0)
+        glTexCoord2f(0.25,0.25); glVertex3f(-1.0,-1.0, 1.0)
+        glTexCoord2f(0.25,0.50); glVertex3f(-1.0, 1.0, 1.0)
+        glEnd()
+
+        glBegin(GL_POLYGON) #// two
+        glTexCoord2f(0.50,0.50); glVertex3f( 1.0, 1.0, 1.0)
+        glTexCoord2f(0.50,0.25); glVertex3f( 1.0,-1.0, 1.0)
+        glTexCoord2f(0.75,0.25); glVertex3f( 1.0,-1.0,-1.0)
+        glTexCoord2f(0.75,0.50); glVertex3f( 1.0, 1.0,-1.0)
+        glEnd()
+
+        glBegin(GL_POLYGON) #// six
+        glTexCoord2f(0.25,0.75); glVertex3f(-1.0, 1.0,-1.0)
+        glTexCoord2f(0.25,0.50); glVertex3f(-1.0, 1.0, 1.0)
+        glTexCoord2f(0.50,0.50); glVertex3f( 1.0, 1.0, 1.0)
+        glTexCoord2f(0.50,0.75); glVertex3f( 1.0, 1.0,-1.0)
+        glEnd()
+
+        glBegin(GL_POLYGON) #// one
+        glTexCoord2f(0.25,0.25); glVertex3f(-1.0, -1.0, 1.0)
+        glTexCoord2f(0.25,0.00); glVertex3f(-1.0, -1.0,-1.0)
+        glTexCoord2f(0.50,0.00); glVertex3f( 1.0, -1.0,-1.0)
+        glTexCoord2f(0.50,0.25); glVertex3f( 1.0, -1.0, 1.0)
+        glEnd()
+
+        glBegin(GL_POLYGON) #//four
+        glTexCoord2f(0.75,0.50); glVertex3f( 1.0, 1.0,-1.0)
+        glTexCoord2f(0.75,0.25); glVertex3f( 1.0,-1.0,-1.0)
+        glTexCoord2f(1.00,0.25); glVertex3f(-1.0,-1.0,-1.0)
+        glTexCoord2f(1.00,0.50); glVertex3f(-1.0, 1.0,-1.0)
+        glEnd()
+        glDisable(GL_TEXTURE_2D)
+        glPopMatrix()
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        if self.terrain_once:
+            yoff = 0
+            for y in range (0, 100):
+                xoff = 0
+                for x in range (0, 100):
+                    terrain[x,y] = np.interp(pnoise2(xoff, yoff), [0,1], [-1.5, 1.9])
+                    xoff += 0.1
+                yoff += 0.1
+            
+            self.terrain_once = False
+            
+
+            glPushMatrix()
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) # add wiremesh
+                    
+            glTranslatef(-5,0,0)
+            glTranslatef(0,-5,0)
+            glRotatef(90, 1.0, 0.0, 0.0 )
+
+            for y in range (0, 100-1):
+                glBegin(GL_TRIANGLE_STRIP)
+                for x in range (0, 100):
+                    glColor3f(0.0, 1.0, 1.0)
+                    glVertex3f(x, y, terrain[x,y])
+                    glVertex3f(x, y+1, terrain[x,y+1])
+                glEnd()
+                
+                
+            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) # remove wiremesh
+            glPopMatrix()
+
+        
+        
         
         self.set_2d()
         
-        glut_print(self.width-170, self.height-10, str(pyglet.clock.get_fps()))
+        x,y,z = self.position
+        text = '%02d (%.2f, %.2f, %.2f)' % (
+            pyglet.clock.get_fps(), x, y, z)
+        
+        
+        drawText((self.width-500, self.height-30, 0), str(text))
                 
         if self.text:
             self.text.draw()
 
         #self.draw_reticle()
+
+
+
+
+
+
 
 
     def set_2d(self):
@@ -330,11 +483,11 @@ class WinPygletGame(pyglet.window.Window):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
 
-    def set_3d(self, clear=True):
+    def set_3d(self):
         """ Configure OpenGL to draw in 3d.
         """
-        if clear:
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        #if clear:
+        #    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         #glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         
         width, height = self.get_size()
@@ -358,10 +511,14 @@ class WinPygletGame(pyglet.window.Window):
         self.reticle.draw(GL_LINES)
         
     def on_resize(self, width, height):
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         pass 
 
     def update(self, dt):
         pass
+
+
+
 
 if __name__ == '__main__':
     from pyglet import gl
