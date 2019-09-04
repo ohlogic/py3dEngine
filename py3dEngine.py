@@ -63,6 +63,10 @@ class WinPygletGame(pyglet.window.Window):
         
         self.refreshrate = refreshrate
         self.angle = 0
+        
+        self.angleYUpDown = 0
+        
+        
         texturefile = "./textures/brick.png"
         self.texture = pyglet.image.load(texturefile).get_texture()
         #glClearColor(0.5, 0.69, 1.0, 1)
@@ -110,7 +114,7 @@ class WinPygletGame(pyglet.window.Window):
         
         self.terrian = Terrian_Floor(100,100)
         self.terrain_once = True
-        
+        self.reticle_select_mode = False
         
         pyglet.clock.schedule_interval(self.update, 1/refreshrate)
         
@@ -142,6 +146,12 @@ class WinPygletGame(pyglet.window.Window):
         glPushMatrix()
         glLoadIdentity()
         vp = glGetIntegerv(GL_VIEWPORT)
+        
+        if self.reticle_select_mode:
+            viewport = self.get_viewport_size()
+            x = viewport[0]//2
+            y = viewport[1]//2
+            
         gluPickMatrix(x, y, 1, 1, vp)
         gluPerspective(30.0, vp[2]/vp[3], 1.0, 1000.0) # if out of range, then select dont work, 1000 good
         glMatrixMode(GL_MODELVIEW)
@@ -178,17 +188,17 @@ class WinPygletGame(pyglet.window.Window):
 
     def on_mouse_release(self, x, y, button, modifiers):
         
-        
+
         if button == pyglet.window.mouse.LEFT:
             self.rotate = False
             update_rotate_vals(self.oo)
 
-            self.set_3d()
-            self.storeit = self.mouseLeftClick(x, y)
-            v = ray_intersect_triangle(np.array(self.storeit[0]), np.array(self.storeit[1]), \
-                np.array([[ 0.0, 1.0, 0.0], [-1.0,-1.0, 0.0],[ 1.0,-1.0, 0.0]]) )
-            if v == 1:
-                print ('intersect (ray intersect triangle method):', v )
+            # self.set_3d()
+            # self.storeit = self.mouseLeftClick(x, y)
+            # v = ray_intersect_triangle(np.array(self.storeit[0]), np.array(self.storeit[1]), \
+                # np.array([[ 0.0, 1.0, 0.0], [-1.0,-1.0, 0.0],[ 1.0,-1.0, 0.0]]) )
+            # if v == 1:
+                # print ('intersect (ray intersect triangle method):', v )
 
         elif button == pyglet.window.mouse.MIDDLE:
             print ('middle button released')
@@ -198,7 +208,8 @@ class WinPygletGame(pyglet.window.Window):
 
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-
+        
+        self.clear()
         
         if buttons & pyglet.window.mouse.LEFT:
             i = x
@@ -214,6 +225,9 @@ class WinPygletGame(pyglet.window.Window):
                 self.oo.tx = float(self.oo.tx) + float(i)
                 self.oo.ty = float(self.oo.ty) + float(j)
         
+        self.angle += -dx
+        self.angleYUpDown += -dy
+        self.terrain_once = True
         
     def on_mouse_motion(self, x, y, dx, dy):
         pass
@@ -373,8 +387,9 @@ class WinPygletGame(pyglet.window.Window):
                 
         if self.text:
             self.text.draw()
-
-        #self.draw_reticle()
+        
+        if self.reticle_select_mode:
+            self.draw_reticle()
 
 
 
@@ -409,7 +424,7 @@ class WinPygletGame(pyglet.window.Window):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
 
-        gluLookAt(0, 0, 0, math.sin(math.radians(self.angle)), 0, math.cos(math.radians(self.angle)) * -1, 0, 1, 0)
+        gluLookAt(0, 0, 0, math.sin(math.radians(self.angle)), math.sin(math.radians(self.angleYUpDown)), math.cos(math.radians(self.angle)) * -1, 0, 1, 0)
         glTranslatef(self.position[0], self.position[1], self.position[2])
         
     def draw_reticle(self):
