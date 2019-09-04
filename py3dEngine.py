@@ -160,7 +160,6 @@ class WinPygletGame(pyglet.window.Window):
 
     def on_mouse_press(self, x, y, button, modifiers):
         
-        global start_x, start_y
         if button == pyglet.window.mouse.LEFT:
             self.get_mouseclick_id(x, y)
             self.rotate = True
@@ -174,7 +173,6 @@ class WinPygletGame(pyglet.window.Window):
             
         elif button == pyglet.window.mouse.RIGHT:
             self.move = True
-            start_x, start_y = (x, y)
 
     def on_mouse_release(self, x, y, button, modifiers):
         self.clear()
@@ -209,11 +207,11 @@ class WinPygletGame(pyglet.window.Window):
                 self.oo.ry = float(self.oo.ry) + float(j)/80.
 
         elif buttons & pyglet.window.mouse.RIGHT:
-            i = x - start_x
-            j = -(start_y - y)
+            i = dx
+            j = dy
             if self.move:
-                self.oo.tx = float(self.oo.tx) + float(i)/20.
-                self.oo.ty = float(self.oo.ty) + float(j)/20.
+                self.oo.tx = float(self.oo.tx) + float(i)
+                self.oo.ty = float(self.oo.ty) + float(j)
         
         self.terrain_once = True
         
