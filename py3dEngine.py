@@ -108,7 +108,6 @@ class WinPygletGame(pyglet.window.Window):
         
         self.text = None
         
-        
         self.terrain = Terrain_Floor(100,100)
         self.terrain.load()
         
@@ -118,8 +117,6 @@ class WinPygletGame(pyglet.window.Window):
             self.set_exclusive_mouse(True)
         
         self.keys = {}
-        
-        self.strafe = [0, 0]
         
         pyglet.clock.schedule_interval(self.update, 1/refreshrate)
         
@@ -303,7 +300,33 @@ class WinPygletGame(pyglet.window.Window):
                 self.selected_obj = 0
             self.oo = self.map.objs[self.selected_obj]
         
-        self.keys[symbol] = True
+        self.keys[symbol] = True    # for on_key_hold method 
+        
+    def on_key_hold(self):
+    
+        # to move in diagonal directions
+        if pyglet.window.key.UP in self.keys and pyglet.window.key.LEFT in self.keys:
+            self.move_up(.1)
+            self.move_left(.1)
+        elif pyglet.window.key.UP in self.keys and pyglet.window.key.RIGHT in self.keys:
+            self.move_up(.1)
+            self.move_right(.1)
+        elif pyglet.window.key.DOWN in self.keys and pyglet.window.key.LEFT in self.keys:
+            self.move_down(.1)
+            self.move_left(.1)
+        elif pyglet.window.key.DOWN in self.keys and pyglet.window.key.RIGHT in self.keys:
+            self.move_down(.1)
+            self.move_right(.1)
+        elif pyglet.window.key.UP in self.keys:
+            self.move_up(.1)
+        elif pyglet.window.key.DOWN in self.keys:
+            self.move_down(.1)
+        elif pyglet.window.key.LEFT in self.keys:
+            self.move_left(.1)
+        elif pyglet.window.key.RIGHT in self.keys:
+            self.move_right(.1)
+    
+    
         
     def fullRotate(self, direction):
         
@@ -391,31 +414,8 @@ class WinPygletGame(pyglet.window.Window):
         glPopMatrix()
 
 
+        self.on_key_hold()
 
-        # to move in diagonal directions
-        if pyglet.window.key.UP in self.keys and pyglet.window.key.LEFT in self.keys:
-            self.move_up(.1)
-            self.move_left(.1)
-        elif pyglet.window.key.UP in self.keys and pyglet.window.key.RIGHT in self.keys:
-            self.move_up(.1)
-            self.move_right(.1)
-        elif pyglet.window.key.DOWN in self.keys and pyglet.window.key.LEFT in self.keys:
-            self.move_down(.1)
-            self.move_left(.1)
-        elif pyglet.window.key.DOWN in self.keys and pyglet.window.key.RIGHT in self.keys:
-            self.move_down(.1)
-            self.move_right(.1)
-        elif pyglet.window.key.UP in self.keys:
-            self.move_up(.1)
-        elif pyglet.window.key.DOWN in self.keys:
-            self.move_down(.1)
-        elif pyglet.window.key.LEFT in self.keys:
-            self.move_left(.1)
-        elif pyglet.window.key.RIGHT in self.keys:
-            self.move_right(.1)
-        
-        
-        
         self.set_2d()
         
         x,y,z = self.position
