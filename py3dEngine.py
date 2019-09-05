@@ -44,13 +44,13 @@ class WorldMap(object):
     def __init__(self):
         super().__init__()
 
-        exec( generate_objs() ) # for dynamic code generation of n objects
+        exec( generate_objs() )         # for dynamic code generation of n objects
 
-        exec( generate_objs_list() ) # for dynamic code generation of n objects
+        exec( generate_objs_list() )    # for dynamic code generation of n objects list
         
     def draw_objs(self, window):
 
-        generate_obj_matrix( window ) # dynamic creation of n objects
+        generate_obj_matrix( window )   # dynamic creation of n objects
 
 
 class WinPygletGame(pyglet.window.Window):
@@ -60,9 +60,7 @@ class WinPygletGame(pyglet.window.Window):
         
         self.refreshrate = refreshrate
         self.angle = 0
-        
         self.angleYUpDown = 0
-        
         
         texturefile = "./textures/brick.png"
         self.texture = pyglet.image.load(texturefile).get_texture()
@@ -81,7 +79,7 @@ class WinPygletGame(pyglet.window.Window):
         #glDisable(GL_TEXTURE_2D)
         #glEnable(GL_DEPTH_TEST)
         #glEnable(GL_BLEND)
-        glEnable(GL_CULL_FACE)
+        #glEnable(GL_CULL_FACE)
 
 
         self.map = WorldMap()
@@ -117,6 +115,7 @@ class WinPygletGame(pyglet.window.Window):
             self.set_exclusive_mouse(True)
         
         self.keys = {}
+        self.mousebuttons = {}
         
         pyglet.clock.schedule_interval(self.update, 1/refreshrate)
         
@@ -164,16 +163,18 @@ class WinPygletGame(pyglet.window.Window):
         glPopMatrix()
         
         hits = glRenderMode(GL_RENDER)
+        
         for n in hits:
             h = n.names[0]
+            #print (', '.join(i for i in dir(n) if not i.startswith('__')))
             print ('Triangle id (select method):', h)
+            break # perform loop just once
 
         glMatrixMode(GL_MODELVIEW)
         
 
     def on_mouse_press(self, x, y, button, modifiers):
         
-
         if button == pyglet.window.mouse.LEFT:
             self.get_mouseclick_id(x, y)
             self.rotate = True
@@ -187,11 +188,16 @@ class WinPygletGame(pyglet.window.Window):
             
         elif button == pyglet.window.mouse.RIGHT:
             self.move = True
-                
+        
+        self.mousebuttons[button] = True    # for on_mousebutton_hold method 
+        
             
     def on_mouse_release(self, x, y, button, modifiers):
         
-
+        if button in self.mousebuttons:     # for on_mousebutton_hold method 
+            del self.mousebuttons[button]   # for on_mousebutton_hold method 
+        
+        
         if button == pyglet.window.mouse.LEFT:
             self.rotate = False
             update_rotate_vals(self.oo)
@@ -208,7 +214,11 @@ class WinPygletGame(pyglet.window.Window):
         elif button == pyglet.window.mouse.RIGHT:
             self.move = False
             update_move_vals(self.oo)
-
+    
+    def on_mousebutton_hold(self):
+        if pyglet.window.mouse.LEFT in self.mousebuttons:
+            if self.x and self.y:
+                self.get_mouseclick_id(self.x, self.y)
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
 
@@ -227,15 +237,14 @@ class WinPygletGame(pyglet.window.Window):
                 self.oo.ty = float(self.oo.ty) + float(j)
 
     def on_mouse_motion(self, x, y, dx, dy):
-        
+        self.x = x
+        self.y = y
         if self.reticle_select_mode:
-            #self.clear()
+        
             self.angle += dx/20.
             self.angleYUpDown += dy/20.
 
-            if self.angle >= 360 or self.angle <= -360:
-                self.angle = 0
-            
+            #self.angle = self.angle % 360
             self.angleYUpDown = max(-90, min(90, self.angleYUpDown))
             
             self.rotation[0] = self.angle
@@ -268,8 +277,8 @@ class WinPygletGame(pyglet.window.Window):
         
         
     def on_key_release(self, symbol, modifiers):
-        if symbol in self.keys:
-            del self.keys[symbol]
+        if symbol in self.keys:     # for on_key_hold method 
+            del self.keys[symbol]   # for on_key_hold method 
         
     def on_key_press(self, symbol, modifiers):
 
@@ -343,8 +352,8 @@ class WinPygletGame(pyglet.window.Window):
             self.on_draw()
             self.dispatch_events()
             self.flip()
-            
-            
+
+
     def on_draw(self):
 
         self.set_3d()
@@ -416,14 +425,16 @@ class WinPygletGame(pyglet.window.Window):
 
         self.on_key_hold()
 
+        
         self.set_2d()
         
         x,y,z = self.position
         infotext = '%02d (%.2f, %.2f, %.2f)' % (
             pyglet.clock.get_fps(), x, y, z)
             
-        drawText((self.width-500, self.height-30, 0), str(infotext))
-        glut_print(0, self.height-35, "Toggle: ESC - to reclaim/hide mouse")
+        drawText((self.width-500, self.height-30, 0), infotext)
+        glut_print(0, self.height-35, "Toggle: ESC - to show/hide mouse")
+        
         glut_print(0, self.height-55, str(self.rotation))
         
         if self.text:
@@ -460,14 +471,23 @@ class WinPygletGame(pyglet.window.Window):
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         gluPerspective(30.0, width / float(height), 1, 1000.0)
-        
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
-
-
-        gluLookAt(0, 0, 0, math.sin(math.radians(self.angle)), math.sin(math.radians(self.angleYUpDown)), math.cos(math.radians(self.angle)) * -1, 0, 1, 0)
+        
+        gluLookAt(0, 0, 0, 
+            math.sin(math.radians(self.angle)), 
+            math.sin(math.radians(self.angleYUpDown)), 
+            math.cos(math.radians(self.angle)) * -1, 
+            0, 1, 0)
         glTranslatef(-self.position[0], -self.position[1], -self.position[2])
         
+        # alternative, also works
+        # x, y = self.rotation
+        # glRotatef(x, 0, 1, 0)
+        # glRotatef(-y, math.cos(math.radians(x)), 0, math.sin(math.radians(x)))
+        # x, y, z = self.position
+        # glTranslatef(-x, -y, -z)
+
     def draw_reticle(self):
         """ Draw the crosshairs in the center of the screen.
         """
@@ -475,13 +495,12 @@ class WinPygletGame(pyglet.window.Window):
         self.reticle.draw(GL_LINES)
         
     def on_resize(self, width, height):
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         pass 
 
     def update(self, dt):
+        #self.on_mousebutton_hold() # for rapid fire, working
         self.on_draw()
         pass
-        
 
 if __name__ == '__main__':
     from pyglet import gl
