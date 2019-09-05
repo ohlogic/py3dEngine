@@ -6,7 +6,7 @@ from pyglet.gl import *
 import numpy as np
 from noise import pnoise2
 
-class Terrian_Floor():
+class Terrain_Floor():
 
     terrain  = {}
     columns = 0
@@ -24,7 +24,10 @@ class Terrian_Floor():
                 xoff += 0.1
             yoff += 0.1
         
-    def draw(self):
+    def load(self):
+        DrawTerrain=glGenLists(1)
+        glNewList(DrawTerrain,GL_COMPILE)
+        
         for y in range (0, self.rows-1):
             glBegin(GL_TRIANGLE_STRIP)
             for x in range (0, self.columns):
@@ -32,3 +35,5 @@ class Terrian_Floor():
                 glVertex3f(x, y, self.terrain[x,y])
                 glVertex3f(x, y+1, self.terrain[x,y+1])
             glEnd()
+        self.drawTerrain = DrawTerrain
+        glEndList()

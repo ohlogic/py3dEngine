@@ -30,8 +30,8 @@ import shapes
 from shapes import *
 
 sys.path.append("./dataobjects")
-import terrian
-from terrian import *
+import terrain
+from terrain import *
 
 sys.path.append("./libs")
 from objloader_dbload import *
@@ -112,9 +112,14 @@ class WinPygletGame(pyglet.window.Window):
         self.text = None
         
         
-        self.terrian = Terrian_Floor(100,100)
-        self.terrain_once = True
-        self.reticle_select_mode = False
+        self.terrain = Terrain_Floor(100,100)
+        self.terrain.load()
+        
+        self.reticle_select_mode = True
+        
+        if self.reticle_select_mode:
+            self.set_exclusive_mouse(True)
+        
         
         pyglet.clock.schedule_interval(self.update, 1/refreshrate)
         
@@ -170,8 +175,7 @@ class WinPygletGame(pyglet.window.Window):
 
 
     def on_mouse_press(self, x, y, button, modifiers):
-        
-
+    
         if button == pyglet.window.mouse.LEFT:
             self.get_mouseclick_id(x, y)
             self.rotate = True
@@ -208,9 +212,7 @@ class WinPygletGame(pyglet.window.Window):
 
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-        
-        self.clear()
-        
+
         if buttons & pyglet.window.mouse.LEFT:
             i = x
             j = y
@@ -224,13 +226,13 @@ class WinPygletGame(pyglet.window.Window):
             if self.move:
                 self.oo.tx = float(self.oo.tx) + float(i)
                 self.oo.ty = float(self.oo.ty) + float(j)
-        
-        self.angle += -dx
-        self.angleYUpDown += -dy
-        self.terrain_once = True
-        
+
     def on_mouse_motion(self, x, y, dx, dy):
-        pass
+        
+        if self.reticle_select_mode:
+            self.clear()
+            self.angle += dx/20.
+            self.angleYUpDown += dy/20.
         
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         print ('SCROLL', x, y, scroll_x, scroll_y)
@@ -258,10 +260,11 @@ class WinPygletGame(pyglet.window.Window):
         
     def on_key_press(self, symbol, modifiers):
 
-        self.clear()
-
-        if symbol == pyglet.window.key.UP:
-
+        
+        if symbol == pyglet.window.key.ESCAPE:
+            self.reticle_select_mode = not self.reticle_select_mode
+            self.set_exclusive_mouse(self.reticle_select_mode)
+        elif symbol == pyglet.window.key.UP:
             self.move_up(10)
         elif symbol == pyglet.window.key.DOWN:
             self.move_down(10)
@@ -285,16 +288,13 @@ class WinPygletGame(pyglet.window.Window):
                 self.selected_obj = 0
             self.oo = self.map.objs[self.selected_obj]
         
-        self.terrain_once = True
         
     def fullRotate(self, direction):
         
         self.direction = direction 
         
-        for i in range(0, 36):
-            #self.clear()
-            self.terrain_once = True
-
+        for i in range(0, 360):
+ 
             if self.direction == 'left':
                 self.angle += 1
                 self.move_left(1)
@@ -308,7 +308,7 @@ class WinPygletGame(pyglet.window.Window):
             
     def on_draw(self, clear=False):
 
-        self.set_3d(clear)
+        self.set_3d()
         glColor3d(1, 1, 1)
         
         self.map.draw_objs(self)
@@ -362,18 +362,17 @@ class WinPygletGame(pyglet.window.Window):
         glPopMatrix()  
         
 
-        if self.terrain_once:
-            
-            glPushMatrix()
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) # add wiremesh
-            glTranslatef(-5,0,0)
-            glTranslatef(0,-5,0)
-            glRotatef(90, 1.0, 0.0, 0.0 )
-            self.terrian.draw()
-            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) # remove wiremesh
-            glPopMatrix()
 
-            self.terrain_once = False
+        glPushMatrix()
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) # add wiremesh
+        glTranslatef(-5,0,0)
+        glTranslatef(0,-5,0)
+        glRotatef(90, 1.0, 0.0, 0.0 )
+        glCallList(self.terrain.drawTerrain)
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) # remove wiremesh
+        glPopMatrix()
+
+
         
         
         self.set_2d()
@@ -384,7 +383,8 @@ class WinPygletGame(pyglet.window.Window):
             pyglet.clock.get_fps(), x, y, z)
         
         drawText((self.width-500, self.height-30, 0), str(infotext))
-                
+        glut_print(0, self.height-35, "Toggle: ESC - to reclaim/hide mouse")
+        
         if self.text:
             self.text.draw()
         
@@ -406,11 +406,12 @@ class WinPygletGame(pyglet.window.Window):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
 
-    def set_3d(self, clear=False):
+    def set_3d(self):
         """ Configure OpenGL to draw in 3d.
         """
-        if clear:
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        #self.clear()
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         
         width, height = self.get_size()
@@ -444,7 +445,7 @@ class WinPygletGame(pyglet.window.Window):
 if __name__ == '__main__':
     from pyglet import gl
     config = gl.Config(double_buffer=True)
-    window = WinPygletGame(width=800, height=600, resizable=True, config=config, vsync = False, refreshrate=60)
+    window = WinPygletGame(width=800, height=600, resizable=True, config=config, vsync = False, refreshrate=30)
     pyglet.app.run()
 
 
