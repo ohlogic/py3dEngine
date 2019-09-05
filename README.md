@@ -1,11 +1,11 @@
 # py3dEngine
-A simple 3d Engine written in Python 3 and demos using the three major frameworks for OpenGL - pyglet, pygame, glfw
+A simple 3d Engine written in Python 3 and demos using the three major frameworks for OpenGL - pyglet, pygame, pyglfw
 
 
 # Purpose
 To create a 3D Engine written in Python 3 and above.
 
-The examples are just show how to use pyglet, pygame, and glfw with OpenGL.
+The examples are just show how to use pyglet, pygame, and pyglfw with OpenGL.
 
 
 
