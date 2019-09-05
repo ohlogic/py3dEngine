@@ -97,7 +97,7 @@ class WinPygletGame(pyglet.window.Window):
         self.oo = self.map.objs[self.selected_obj]
 
 
-        self.position = [0, 0, -65]
+        self.position = [0, 0, 65]
         self.rotation = [0, 0]
 
         x, y = self.width // 2, self.height // 2
@@ -233,14 +233,16 @@ class WinPygletGame(pyglet.window.Window):
         
         if self.reticle_select_mode:
             #self.clear()
-            #self.angle += dx/20.
-            #self.angleYUpDown += dy/20.
-        
-            m = 0.15
-            x, y = self.rotation
-            x, y = x + dx * m, y + dy * m
-            y = max(-90, min(90, y))
-            self.rotation = (x, y)
+            self.angle += dx/20.
+            self.angleYUpDown += dy/20.
+
+            if self.angle >= 360 or self.angle <= -360:
+                self.angle = 0
+            
+            self.angleYUpDown = max(-90, min(90, self.angleYUpDown))
+            
+            self.rotation[0] = self.angle
+            self.rotation[1] = self.angleYUpDown
             
             
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
@@ -261,11 +263,11 @@ class WinPygletGame(pyglet.window.Window):
         self.position[0] += n * math.cos(math.radians(self.angle))
         self.position[2] += n * math.sin(math.radians(self.angle))
     def move_up(self, n):
-        self.position[2] += n * math.cos(math.radians(self.angle))
-        self.position[0] -= n * math.sin(math.radians(self.angle))
-    def move_down(self, n):
         self.position[2] -= n * math.cos(math.radians(self.angle))
         self.position[0] += n * math.sin(math.radians(self.angle))
+    def move_down(self, n):
+        self.position[2] += n * math.cos(math.radians(self.angle))
+        self.position[0] -= n * math.sin(math.radians(self.angle))
         
         
     def on_key_release(self, symbol, modifiers):
@@ -463,14 +465,8 @@ class WinPygletGame(pyglet.window.Window):
         glLoadIdentity()
 
 
-        x, y = self.rotation
-        glRotatef(x, 0, 1, 0)
-        glRotatef(-y, math.cos(math.radians(x)), 0, math.sin(math.radians(x)))
-        x, y, z = self.position
-        glTranslatef(-x, -y, z)
-
-        #gluLookAt(0, 0, 0, math.sin(math.radians(self.angle)), math.sin(math.radians(self.angleYUpDown)), math.cos(math.radians(self.angle)) * -1, 0, 1, 0)
-        #glTranslatef(self.position[0], self.position[1], self.position[2])
+        gluLookAt(0, 0, 0, math.sin(math.radians(self.angle)), math.sin(math.radians(self.angleYUpDown)), math.cos(math.radians(self.angle)) * -1, 0, 1, 0)
+        glTranslatef(-self.position[0], -self.position[1], -self.position[2])
         
     def draw_reticle(self):
         """ Draw the crosshairs in the center of the screen.
