@@ -5,7 +5,7 @@ A simple 3d Engine written in Python 3 and demos using the three major framework
 # Purpose
 To create a 3D Engine written in Python 3 and above.
 
-The examples are just show how to use pyglet, pygame, and pyglfw with OpenGL.
+The examples are just to show how to use pyglet, pygame, and pyglfw with OpenGL.
 
 
 
