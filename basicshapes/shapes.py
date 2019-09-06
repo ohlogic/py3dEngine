@@ -9,45 +9,45 @@ class Texuture_Cube():
             
     def draw():
         glBegin(GL_POLYGON) #// three
-        glTexCoord2f(0.25,0.50); glVertex3f(-1.0, 1.0, 1.0)
-        glTexCoord2f(0.25,0.25); glVertex3f(-1.0,-1.0, 1.0)
-        glTexCoord2f(0.50,0.25); glVertex3f( 1.0,-1.0, 1.0)
-        glTexCoord2f(0.50,0.50); glVertex3f( 1.0, 1.0, 1.0)
+        glTexCoord2f(0,.5); glVertex3f(-1.0, 1.0, 1.0)
+        glTexCoord2f(.5,.5); glVertex3f(-1.0,-1.0, 1.0)
+        glTexCoord2f(.5,0); glVertex3f( 1.0,-1.0, 1.0)
+        glTexCoord2f(0,0); glVertex3f( 1.0, 1.0, 1.0)
         glEnd()
 
         glBegin(GL_POLYGON) #// five
-        glTexCoord2f(0.00,0.50); glVertex3f(-1.0, 1.0,-1.0)
-        glTexCoord2f(0.00,0.25); glVertex3f(-1.0,-1.0,-1.0)
-        glTexCoord2f(0.25,0.25); glVertex3f(-1.0,-1.0, 1.0)
-        glTexCoord2f(0.25,0.50); glVertex3f(-1.0, 1.0, 1.0)
+        glTexCoord2f(0,.5); glVertex3f(-1.0, 1.0,-1.0)
+        glTexCoord2f(.5,.5); glVertex3f(-1.0,-1.0,-1.0)
+        glTexCoord2f(.5,0); glVertex3f(-1.0,-1.0, 1.0)
+        glTexCoord2f(0,0); glVertex3f(-1.0, 1.0, 1.0)
         glEnd()
 
         glBegin(GL_POLYGON) #// two
-        glTexCoord2f(0.50,0.50); glVertex3f( 1.0, 1.0, 1.0)
-        glTexCoord2f(0.50,0.25); glVertex3f( 1.0,-1.0, 1.0)
-        glTexCoord2f(0.75,0.25); glVertex3f( 1.0,-1.0,-1.0)
-        glTexCoord2f(0.75,0.50); glVertex3f( 1.0, 1.0,-1.0)
+        glTexCoord2f(0,.5); glVertex3f( 1.0, 1.0, 1.0)
+        glTexCoord2f(.5,.5); glVertex3f( 1.0,-1.0, 1.0)
+        glTexCoord2f(.5,0); glVertex3f( 1.0,-1.0,-1.0)
+        glTexCoord2f(0,0); glVertex3f( 1.0, 1.0,-1.0)
         glEnd()
 
         glBegin(GL_POLYGON) #// six
-        glTexCoord2f(0.25,0.75); glVertex3f(-1.0, 1.0,-1.0)
-        glTexCoord2f(0.25,0.50); glVertex3f(-1.0, 1.0, 1.0)
-        glTexCoord2f(0.50,0.50); glVertex3f( 1.0, 1.0, 1.0)
-        glTexCoord2f(0.50,0.75); glVertex3f( 1.0, 1.0,-1.0)
+        glTexCoord2f(0,0.5); glVertex3f(-1.0, 1.0,-1.0)
+        glTexCoord2f(.5,.5); glVertex3f(-1.0, 1.0, 1.0)
+        glTexCoord2f(0.5,0); glVertex3f( 1.0, 1.0, 1.0)
+        glTexCoord2f(0,0); glVertex3f( 1.0, 1.0,-1.0)
         glEnd()
 
         glBegin(GL_POLYGON) #// one
-        glTexCoord2f(0.25,0.25); glVertex3f(-1.0, -1.0, 1.0)
-        glTexCoord2f(0.25,0.00); glVertex3f(-1.0, -1.0,-1.0)
-        glTexCoord2f(0.50,0.00); glVertex3f( 1.0, -1.0,-1.0)
-        glTexCoord2f(0.50,0.25); glVertex3f( 1.0, -1.0, 1.0)
+        glTexCoord2f(0,0.5); glVertex3f(-1.0, -1.0, 1.0)
+        glTexCoord2f(.5,.5); glVertex3f(-1.0, -1.0,-1.0)
+        glTexCoord2f(.5,0); glVertex3f( 1.0, -1.0,-1.0)
+        glTexCoord2f(0,0); glVertex3f( 1.0, -1.0, 1.0)
         glEnd()
 
         glBegin(GL_POLYGON) #//four
-        glTexCoord2f(0.75,0.50); glVertex3f( 1.0, 1.0,-1.0)
-        glTexCoord2f(0.75,0.25); glVertex3f( 1.0,-1.0,-1.0)
-        glTexCoord2f(1.00,0.25); glVertex3f(-1.0,-1.0,-1.0)
-        glTexCoord2f(1.00,0.50); glVertex3f(-1.0, 1.0,-1.0)
+        glTexCoord2f(0,.5); glVertex3f( 1.0, 1.0,-1.0)
+        glTexCoord2f(.5,.5); glVertex3f( 1.0,-1.0,-1.0)
+        glTexCoord2f(.5,0); glVertex3f(-1.0,-1.0,-1.0)
+        glTexCoord2f(0,0); glVertex3f(-1.0, 1.0,-1.0)
         glEnd()
 
 

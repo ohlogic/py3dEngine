@@ -161,3 +161,13 @@ class OBJ100(OBJdb):
         self.ty = ty
         self.name = name
         self.id = id
+
+# added just to move around the world with mouse      
+class OBJworld():
+    def __init__(self,x,swapyz, name, id, rx, ry, tx, ty):
+        self.rx = rx
+        self.ry = ry
+        self.tx = tx
+        self.ty = ty
+        self.name = name
+        self.id = id

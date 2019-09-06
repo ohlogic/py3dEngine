@@ -81,16 +81,20 @@ class WinPygletGame(pyglet.window.Window):
         #glDisable(GL_TEXTURE_2D)
         #glEnable(GL_DEPTH_TEST)
         #glEnable(GL_BLEND)
-        #glEnable(GL_CULL_FACE)
-
+        glEnable(GL_CULL_FACE)
+        glCullFace(GL_BACK)
 
         self.map = WorldMap()
-
-        self.frame_times = []
-        self.start_t = time.time()
+        self.selected_obj = len(self.map.objs)
+        
+        # added just to move around the world with mouse
+        self.map.objs.append( OBJworld(name='world',x='',swapyz=False,id=0, rx=0, ry=0, tx=0, ty=0) )
+        
+        #self.frame_times = []
+        #self.start_t = time.time()
 
         self.storeit = None
-        self.selected_obj = 0
+        
         self.rotate = False
         self.move = False
         self.zpos = 5
@@ -118,6 +122,10 @@ class WinPygletGame(pyglet.window.Window):
         
         self.keys = {}
         self.mousebuttons = {}
+        
+        
+
+        
         
         pyglet.clock.schedule_interval(self.update, 1/refreshrate)
         
@@ -226,6 +234,12 @@ class WinPygletGame(pyglet.window.Window):
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
 
         if buttons & pyglet.window.mouse.LEFT:
+        
+            if self.oo.name == 'world':
+                self.move_left(-dx) 
+                self.move_up(dy)
+                return
+                
             i = x
             j = y
             if self.rotate:
