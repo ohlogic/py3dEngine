@@ -7,7 +7,8 @@ import numpy as np
 from noise import pnoise2
 
 class Terrain_Floor():
-
+    
+    drawTerrain = None
     terrain  = {}
     columns = 0
     rows = 0

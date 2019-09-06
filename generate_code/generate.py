@@ -36,7 +36,7 @@ def generate_obj_matrix(winpg):
     cur.execute('SELECT fixobj FROM worldmap_objects;')
     str1 = ""
     count = 0
-    glColor3f(0.0, 0.0, 0.0)
+
     for row in cur.fetchall():
         glPushMatrix()
         

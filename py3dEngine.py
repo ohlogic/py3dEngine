@@ -67,15 +67,17 @@ class WinPygletGame(pyglet.window.Window):
         #glClearColor(0.5, 0.69, 1.0, 1)
         glClearColor(0.902, 0.902, 1, 0.0)
         
-        #glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
-        #glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
-        #glLightfv(GL_LIGHT0, GL_DIFFUSE, (0.5, 0.5, 0.5, 1.0))
-        #glEnable(GL_LIGHT0)
-        #glEnable(GL_LIGHTING)
+        glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
+        glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, (0.5, 0.5, 0.5, 1.0))
+        glEnable(GL_LIGHT0)
+        glEnable(GL_LIGHTING)
         glEnable(GL_COLOR_MATERIAL)
         glEnable(GL_DEPTH_TEST)
         glShadeModel(GL_SMOOTH)           # most obj files expect to be smooth-shaded
-
+        
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)
+        
         #glDisable(GL_TEXTURE_2D)
         #glEnable(GL_DEPTH_TEST)
         #glEnable(GL_BLEND)
@@ -118,6 +120,7 @@ class WinPygletGame(pyglet.window.Window):
         self.mousebuttons = {}
         
         pyglet.clock.schedule_interval(self.update, 1/refreshrate)
+        
         
         
     def mouseLeftClick(self, x, y):
@@ -359,11 +362,13 @@ class WinPygletGame(pyglet.window.Window):
         self.set_3d()
         glColor3d(1, 1, 1)
         
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) # add wiremesh mode
+        #glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) # add wiremesh mode
+
+        glBindTexture(GL_TEXTURE_2D, 0) # to reset colors one way is to bind the default texture
         
         self.map.draw_objs(self)
         
-        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) #remove wiremesh mode
+        #glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) #remove wiremesh mode
         
         glut_print(0, self.height-10, self.oo.name)
         
@@ -388,7 +393,6 @@ class WinPygletGame(pyglet.window.Window):
         glPushMatrix()
         glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D, self.texture.id)
-        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
         Texture_Triangle.draw() 
         glDisable(GL_TEXTURE_2D)
         glPopMatrix()

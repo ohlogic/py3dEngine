@@ -125,7 +125,7 @@ class OBJdb:
             vertices, normals, texture_coords, material = face
 
 
-            if "mtl" in OBJdb.__dict__.values():
+            if "mtl" in vars(self).keys():
                 mtl = self.mtl[material]
                 
                 if 'texture_Kd' in mtl:
@@ -134,6 +134,9 @@ class OBJdb:
                 else:
                     # just use diffuse colour
                     glColor(*mtl['Kd'])
+            else:
+                glColor(0.9, 0.9, 0.9)
+                
             glLoadName(count)
 
             glBegin(GL_POLYGON)
