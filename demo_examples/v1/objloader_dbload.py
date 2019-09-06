@@ -130,7 +130,7 @@ class OBJdb:
             vertices, normals, texture_coords, material = face
 
 
-            if "mtl" in OBJdb.__dict__.values():
+            if "mtl" in vars(self).keys():
                 mtl = self.mtl[material]
                 
                 if 'texture_Kd' in mtl:
