@@ -8,6 +8,7 @@
 
 import pyglet
 from pyglet.gl import *
+from pyglet.window import key, mouse
 
 import sys
 sys.setrecursionlimit(10000)
@@ -82,7 +83,8 @@ class WinPygletGame(pyglet.window.Window):
         #glEnable(GL_DEPTH_TEST)
         #glEnable(GL_BLEND)
         glEnable(GL_CULL_FACE)
-        glCullFace(GL_BACK)
+        glCullFace(GL_FRONT)
+
 
         self.map = WorldMap()
         self.selected_obj = len(self.map.objs)
@@ -101,8 +103,10 @@ class WinPygletGame(pyglet.window.Window):
         self.oo = self.map.objs[self.selected_obj]
 
 
-        self.position = [0, 0, 65]
-        self.rotation = [0, 0]
+        self.position = [30, 0, -65]
+        self.rotation = [180, 0]
+        self.angle = self.rotation[0]
+
 
         x, y = self.width // 2, self.height // 2
         n = 10
@@ -122,9 +126,6 @@ class WinPygletGame(pyglet.window.Window):
         
         self.keys = {}
         self.mousebuttons = {}
-        
-        
-
         
         
         pyglet.clock.schedule_interval(self.update, 1/refreshrate)
@@ -178,9 +179,9 @@ class WinPygletGame(pyglet.window.Window):
         for n in hits:
             h = n.names[0]
             #print (', '.join(i for i in dir(n) if not i.startswith('__')))
-            print ('Triangle id (select method):', h)
-            break # perform loop just once
-
+            print ('Triangle id (select method):', h, n.near)
+            #break # perform loop just once
+        print ()
         glMatrixMode(GL_MODELVIEW)
         
 
@@ -232,13 +233,8 @@ class WinPygletGame(pyglet.window.Window):
                 self.get_mouseclick_id(self.x, self.y)
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-
-        if buttons & pyglet.window.mouse.LEFT:
         
-            if self.oo.name == 'world':
-                self.move_left(-dx) 
-                self.move_up(dy)
-                return
+        if buttons & pyglet.window.mouse.LEFT:
                 
             i = x
             j = y
@@ -247,6 +243,10 @@ class WinPygletGame(pyglet.window.Window):
                 self.oo.ry = float(self.oo.ry) + float(j)/80.
 
         elif buttons & pyglet.window.mouse.RIGHT:
+            if self.oo.name == 'world':
+                self.move_left(-dx) 
+                self.move_up(dy)              
+                return
             i = dx
             j = dy
             if self.move:
@@ -414,7 +414,7 @@ class WinPygletGame(pyglet.window.Window):
         
         glPushMatrix()
         glEnable(GL_TEXTURE_2D)
-        glTranslatef(5, 5, 0)
+        glTranslatef(10, 15, 0)
         glBindTexture (GL_TEXTURE_2D, self.texture.id);
         Texuture_Square.draw()
         glDisable(GL_TEXTURE_2D)
@@ -422,7 +422,7 @@ class WinPygletGame(pyglet.window.Window):
         
         
         glPushMatrix()
-        glTranslatef(5, -5, 0)
+        glTranslatef(5, 0, 0)
         glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D, self.texture.id)
         Texuture_Cube.draw()
@@ -433,9 +433,10 @@ class WinPygletGame(pyglet.window.Window):
 
         glPushMatrix()
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) # add wiremesh
-        glTranslatef(-5,0,0)
-        glTranslatef(0,-5,0)
-        glRotatef(90, 1.0, 0.0, 0.0 )
+
+        glTranslatef(0,-10,0)
+        glRotatef(270, 1.0, .0, 0.0 )
+
         glCallList(self.terrain.drawTerrain)
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) # remove wiremesh
         glPopMatrix()
@@ -487,9 +488,11 @@ class WinPygletGame(pyglet.window.Window):
         viewport = self.get_viewport_size()
         glViewport(0, 0, max(1, viewport[0]), max(1, viewport[1]))
         glMatrixMode(GL_PROJECTION)
+        
         glLoadIdentity()
-        gluPerspective(30.0, width / float(height), 1, 1000.0)
+        gluPerspective(45.0, width / float(height), 1, 1000.0)
         glMatrixMode(GL_MODELVIEW)
+        #modelview = glGetFloatv(GL_MODELVIEW_MATRIX)
         glLoadIdentity()
         
         gluLookAt(0, 0, 0, 
@@ -498,10 +501,11 @@ class WinPygletGame(pyglet.window.Window):
             math.cos(math.radians(self.angle)) * -1, 
             0, 1, 0)
         glTranslatef(-self.position[0], -self.position[1], -self.position[2])
-        
+        #glScalef(-1, 1, 1)
         # alternative, also works
         # x, y = self.rotation
         # glRotatef(x, 0, 1, 0)
+        # glMultMatrixf(modelview)
         # glRotatef(-y, math.cos(math.radians(x)), 0, math.sin(math.radians(x)))
         # x, y, z = self.position
         # glTranslatef(-x, -y, -z)
