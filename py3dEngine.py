@@ -77,6 +77,7 @@ class WinPygletGame(pyglet.window.Window):
         glEnable(GL_DEPTH_TEST)
         glShadeModel(GL_SMOOTH)           # most obj files expect to be smooth-shaded
         
+        
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)
         
         #glDisable(GL_TEXTURE_2D)
@@ -186,7 +187,7 @@ class WinPygletGame(pyglet.window.Window):
         
 
     def on_mouse_press(self, x, y, button, modifiers):
-        
+
         if button == pyglet.window.mouse.LEFT:
             self.get_mouseclick_id(x, y)
             self.rotate = True
@@ -266,7 +267,7 @@ class WinPygletGame(pyglet.window.Window):
             
             self.rotation[0] = self.angle
             self.rotation[1] = self.angleYUpDown
-            
+
             
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         print ('SCROLL', x, y, scroll_x, scroll_y)
@@ -490,7 +491,7 @@ class WinPygletGame(pyglet.window.Window):
         glMatrixMode(GL_PROJECTION)
         
         glLoadIdentity()
-        gluPerspective(45.0, width / float(height), 1, 1000.0)
+        gluPerspective(30.0, width / float(height), 1, 1000.0)
         glMatrixMode(GL_MODELVIEW)
         #modelview = glGetFloatv(GL_MODELVIEW_MATRIX)
         glLoadIdentity()
@@ -501,7 +502,7 @@ class WinPygletGame(pyglet.window.Window):
             math.cos(math.radians(self.angle)) * -1, 
             0, 1, 0)
         glTranslatef(-self.position[0], -self.position[1], -self.position[2])
-        #glScalef(-1, 1, 1)
+
         # alternative, also works
         # x, y = self.rotation
         # glRotatef(x, 0, 1, 0)
