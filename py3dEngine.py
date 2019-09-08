@@ -48,7 +48,11 @@ class WorldMap(object):
         exec( generate_objs() )         # for dynamic code generation of n objects
 
         exec( generate_objs_list() )    # for dynamic code generation of n objects list
-        
+       
+        self.terrain = Terrain_Floor(100,100)
+        self.terrain.load()
+
+       
     def draw_objs(self, window):
 
         generate_obj_matrix( window )   # dynamic creation of n objects
@@ -68,7 +72,7 @@ class WinPygletGame(pyglet.window.Window):
         #glClearColor(0.5, 0.69, 1.0, 1)
         glClearColor(0.902, 0.902, 1, 0.0)
         
-        glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
+        glLightfv(GL_LIGHT0, GL_POSITION,  (0, 50, 0, 0.0))
         glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
         glLightfv(GL_LIGHT0, GL_DIFFUSE, (0.5, 0.5, 0.5, 1.0))
         glEnable(GL_LIGHT0)
@@ -84,7 +88,7 @@ class WinPygletGame(pyglet.window.Window):
         #glEnable(GL_DEPTH_TEST)
         #glEnable(GL_BLEND)
         glEnable(GL_CULL_FACE)
-        glCullFace(GL_FRONT)
+        glCullFace(GL_FRONT)   # so that objects do not appear to rotate
 
 
         self.map = WorldMap()
@@ -117,16 +121,15 @@ class WinPygletGame(pyglet.window.Window):
         
         self.text = None
         
-        self.terrain = Terrain_Floor(100,100)
-        self.terrain.load()
+
         
         self.reticle_select_mode = True
         
         if self.reticle_select_mode:
             self.set_exclusive_mouse(True)
         
-        self.keys = {}
-        self.mousebuttons = {}
+        self.keys = {}          # for on_key_hold method
+        self.mousebuttons = {}  # for on_mousebutton_hold method
         
         
         pyglet.clock.schedule_interval(self.update, 1/refreshrate)
@@ -188,18 +191,18 @@ class WinPygletGame(pyglet.window.Window):
 
     def on_mouse_press(self, x, y, button, modifiers):
 
-        if button == pyglet.window.mouse.LEFT:
+        if button == mouse.LEFT:
             self.get_mouseclick_id(x, y)
             self.rotate = True
             
-        elif button == pyglet.window.mouse.MIDDLE:
+        elif button == mouse.MIDDLE:
 
             self.text = pyglet.text.HTMLLabel(
                 '<font face="Times New Roman" size="4">Hello, <i>World</i></font>',
                 x=x, y=y,
                 anchor_x='center', anchor_y='center')
             
-        elif button == pyglet.window.mouse.RIGHT:
+        elif button == mouse.RIGHT:
             self.move = True
         
         self.mousebuttons[button] = True    # for on_mousebutton_hold method 
@@ -211,7 +214,7 @@ class WinPygletGame(pyglet.window.Window):
             del self.mousebuttons[button]   # for on_mousebutton_hold method 
         
         
-        if button == pyglet.window.mouse.LEFT:
+        if button == mouse.LEFT:
             self.rotate = False
             update_rotate_vals(self.oo)
 
@@ -222,20 +225,20 @@ class WinPygletGame(pyglet.window.Window):
             # if v == 1:
                 # print ('intersect (ray intersect triangle method):', v )
 
-        elif button == pyglet.window.mouse.MIDDLE:
+        elif button == mouse.MIDDLE:
             print ('middle button released')
-        elif button == pyglet.window.mouse.RIGHT:
+        elif button == mouse.RIGHT:
             self.move = False
             update_move_vals(self.oo)
     
     def on_mousebutton_hold(self):
-        if pyglet.window.mouse.LEFT in self.mousebuttons:
+        if mouse.LEFT in self.mousebuttons:
             if self.x and self.y:
                 self.get_mouseclick_id(self.x, self.y)
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         
-        if buttons & pyglet.window.mouse.LEFT:
+        if buttons & mouse.LEFT:
                 
             i = x
             j = y
@@ -243,7 +246,7 @@ class WinPygletGame(pyglet.window.Window):
                 self.oo.rx = float(self.oo.rx) + float(i)/80.
                 self.oo.ry = float(self.oo.ry) + float(j)/80.
 
-        elif buttons & pyglet.window.mouse.RIGHT:
+        elif buttons & mouse.RIGHT:
             if self.oo.name == 'world':
                 self.move_left(-dx) 
                 self.move_up(dy)              
@@ -300,28 +303,28 @@ class WinPygletGame(pyglet.window.Window):
         
     def on_key_press(self, symbol, modifiers):
 
-        if symbol == pyglet.window.key.ESCAPE:
+        if symbol == key.ESCAPE:
             self.reticle_select_mode = not self.reticle_select_mode
             self.set_exclusive_mouse(self.reticle_select_mode)
-        elif symbol == pyglet.window.key.UP:
+        elif symbol == key.UP:
             self.move_up(.1)
-        elif symbol == pyglet.window.key.DOWN:
+        elif symbol == key.DOWN:
             self.move_down(.1)
-        elif symbol == pyglet.window.key.LEFT:
+        elif symbol == key.LEFT:
             self.move_left(.1)
-        elif symbol == pyglet.window.key.RIGHT:
+        elif symbol == key.RIGHT:
             self.move_right(.1)
-        elif symbol == pyglet.window.key._1:
+        elif symbol == key._1:
             self.rotate3d(10)
             self.move_right(10)
-        elif symbol == pyglet.window.key._2:
+        elif symbol == key._2:
             self.rotate3d(-10)
             self.move_left(10)
-        elif symbol == pyglet.window.key._3:
+        elif symbol == key._3:
             self.fullRotate('left')
-        elif symbol == pyglet.window.key._4:
+        elif symbol == key._4:
             self.fullRotate('right')
-        elif symbol == pyglet.window.key.TAB:
+        elif symbol == key.TAB:
             self.selected_obj +=1
             if self.selected_obj >= len(self.map.objs):
                 self.selected_obj = 0
@@ -332,25 +335,25 @@ class WinPygletGame(pyglet.window.Window):
     def on_key_hold(self):
     
         # to move in diagonal directions
-        if pyglet.window.key.UP in self.keys and pyglet.window.key.LEFT in self.keys:
+        if key.UP in self.keys and key.LEFT in self.keys:
             self.move_up(.1)
             self.move_left(.1)
-        elif pyglet.window.key.UP in self.keys and pyglet.window.key.RIGHT in self.keys:
+        elif key.UP in self.keys and key.RIGHT in self.keys:
             self.move_up(.1)
             self.move_right(.1)
-        elif pyglet.window.key.DOWN in self.keys and pyglet.window.key.LEFT in self.keys:
+        elif key.DOWN in self.keys and key.LEFT in self.keys:
             self.move_down(.1)
             self.move_left(.1)
-        elif pyglet.window.key.DOWN in self.keys and pyglet.window.key.RIGHT in self.keys:
+        elif key.DOWN in self.keys and key.RIGHT in self.keys:
             self.move_down(.1)
             self.move_right(.1)
-        elif pyglet.window.key.UP in self.keys:
+        elif key.UP in self.keys:
             self.move_up(.1)
-        elif pyglet.window.key.DOWN in self.keys:
+        elif key.DOWN in self.keys:
             self.move_down(.1)
-        elif pyglet.window.key.LEFT in self.keys:
+        elif key.LEFT in self.keys:
             self.move_left(.1)
-        elif pyglet.window.key.RIGHT in self.keys:
+        elif key.RIGHT in self.keys:
             self.move_right(.1)
     
     
@@ -435,10 +438,10 @@ class WinPygletGame(pyglet.window.Window):
         glPushMatrix()
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) # add wiremesh
 
-        glTranslatef(0,-10,0)
-        glRotatef(270, 1.0, .0, 0.0 )
+        glTranslatef(0,-5,0)
+        glRotatef(-90, 1.0, .0, 0.0 )
 
-        glCallList(self.terrain.drawTerrain)
+        glCallList(self.map.terrain.drawTerrain)
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) # remove wiremesh
         glPopMatrix()
 
@@ -501,6 +504,9 @@ class WinPygletGame(pyglet.window.Window):
             math.sin(math.radians(self.angleYUpDown)), 
             math.cos(math.radians(self.angle)) * -1, 
             0, 1, 0)
+            
+        self.terrain_collision_detection()
+            
         glTranslatef(-self.position[0], -self.position[1], -self.position[2])
 
         # alternative, also works
@@ -524,7 +530,11 @@ class WinPygletGame(pyglet.window.Window):
         #self.on_mousebutton_hold() # for rapid fire, working
         self.on_draw()
         pass
+    
+    def terrain_collision_detection(self):
+        self.position[1] = self.map.terrain.floor[int(self.position[0]), -int(self.position[2])]
 
+    
 if __name__ == '__main__':
     from pyglet import gl
     config = gl.Config(double_buffer=True)

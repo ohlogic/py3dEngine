@@ -1,0 +1,11 @@
+- Changelog for v0.0.2 (2019-09-07):
+  * Put terrain in the map class
+  * Created terrain collision detection method
+  
+- Changelog for v0.0.1 (2019-09-01):
+  * Terrain generation with Perlin noise function
+  * Dynamic loading of 3d object meshes into list and dynamic code
+    from database to create objects in opengl world
+  * ==Development version created==
+  * Also creation of demo examples in object oriented code
+  * Initial creation of demo examples in pyglet, pygame, and pyglfw
