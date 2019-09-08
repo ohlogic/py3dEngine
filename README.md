@@ -1,9 +1,9 @@
 # py3dEngine
-A simple 3d Engine written in Python 3 and demos using the three major frameworks for OpenGL - pyglet, pygame, pyglfw
+A simple 3d Engine Game written in Python 3 and demos using the three major python frameworks for OpenGL - pyglet, pygame, pyglfw
 
 
 # Purpose
-To create a 3D Engine written in Python 3 and above.
+To create a 3D Engine Game written in Python 3 and above.
 
 The examples are just to show how to use pyglet, pygame, and pyglfw with OpenGL.
 
@@ -11,7 +11,7 @@ The examples are just to show how to use pyglet, pygame, and pyglfw with OpenGL.
 
 # Features
 
-1) The 3d Engine can load objects from Blender, wavefront files I think.
+1) The 3d Engine can load objects from Blender, wavefront files.
 
 2) There is rotation and movement of each object loaded.
 
