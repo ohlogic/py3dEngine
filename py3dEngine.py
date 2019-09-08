@@ -80,13 +80,18 @@ class WinPygletGame(pyglet.window.Window):
         glEnable(GL_COLOR_MATERIAL)
         glEnable(GL_DEPTH_TEST)
         glShadeModel(GL_SMOOTH)           # most obj files expect to be smooth-shaded
-        
+        #glLightModelf(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE)
         
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)
         
         #glDisable(GL_TEXTURE_2D)
         #glEnable(GL_DEPTH_TEST)
-        #glEnable(GL_BLEND)
+        
+        # glEnable(GL_BLEND)
+        # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        # glEnable(GL_POINT_SMOOTH)
+        # glHint(GL_POINT_SMOOTH_HINT, GL_NICEST)
+
         glEnable(GL_CULL_FACE)
         glCullFace(GL_FRONT)   # so that objects do not appear to rotate
 
@@ -447,7 +452,7 @@ class WinPygletGame(pyglet.window.Window):
 
 
         self.on_key_hold()
-
+        
         
         self.set_2d()
         
@@ -505,8 +510,6 @@ class WinPygletGame(pyglet.window.Window):
             math.cos(math.radians(self.angle)) * -1, 
             0, 1, 0)
             
-        self.terrain_collision_detection()
-            
         glTranslatef(-self.position[0], -self.position[1], -self.position[2])
 
         # alternative, also works
@@ -527,11 +530,13 @@ class WinPygletGame(pyglet.window.Window):
         pass 
 
     def update(self, dt):
-        #self.on_mousebutton_hold() # for rapid fire, working
+        self.on_mousebutton_hold()      # for rapid fire, working
+        self.terrain_collision_detection()
         self.on_draw()
         pass
     
     def terrain_collision_detection(self):
+        # temp, for now, no walking off map
         self.position[1] = self.map.terrain.floor[int(self.position[0]), -int(self.position[2])]
 
     
