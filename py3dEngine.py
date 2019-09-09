@@ -8,7 +8,6 @@
 
 import pyglet
 from pyglet.gl import *
-from pyglet.window import key, mouse
 
 import sys
 sys.setrecursionlimit(10000)
@@ -22,15 +21,12 @@ sys.path.insert(0, "./db")
 from db import *
 
 sys.path.append("./generate_code")
-import generate
 from generate import *
 
 sys.path.append("./basicshapes")
-import shapes
 from shapes import *
 
 sys.path.append("./dataobjects")
-import terrain
 from terrain import *
 
 sys.path.append("./libs")
@@ -196,18 +192,18 @@ class WinPygletGame(pyglet.window.Window):
 
     def on_mouse_press(self, x, y, button, modifiers):
 
-        if button == mouse.LEFT:
+        if button == pyglet.window.mouse.LEFT:
             self.get_mouseclick_id(x, y)
             self.rotate = True
             
-        elif button == mouse.MIDDLE:
+        elif button == pyglet.window.mouse.MIDDLE:
 
             self.text = pyglet.text.HTMLLabel(
                 '<font face="Times New Roman" size="4">Hello, <i>World</i></font>',
                 x=x, y=y,
                 anchor_x='center', anchor_y='center')
             
-        elif button == mouse.RIGHT:
+        elif button == pyglet.window.mouse.RIGHT:
             self.move = True
         
         self.mousebuttons[button] = True    # for on_mousebutton_hold method 
@@ -219,7 +215,7 @@ class WinPygletGame(pyglet.window.Window):
             del self.mousebuttons[button]   # for on_mousebutton_hold method 
         
         
-        if button == mouse.LEFT:
+        if button == pyglet.window.mouse.LEFT:
             self.rotate = False
             update_rotate_vals(self.oo)
 
@@ -230,20 +226,20 @@ class WinPygletGame(pyglet.window.Window):
             # if v == 1:
                 # print ('intersect (ray intersect triangle method):', v )
 
-        elif button == mouse.MIDDLE:
+        elif button == pyglet.window.mouse.MIDDLE:
             print ('middle button released')
-        elif button == mouse.RIGHT:
+        elif button == pyglet.window.mouse.RIGHT:
             self.move = False
             update_move_vals(self.oo)
     
     def on_mousebutton_hold(self):
-        if mouse.LEFT in self.mousebuttons:
+        if pyglet.window.mouse.LEFT in self.mousebuttons:
             if self.x and self.y:
                 self.get_mouseclick_id(self.x, self.y)
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         
-        if buttons & mouse.LEFT:
+        if buttons & pyglet.window.mouse.LEFT:
                 
             i = x
             j = y
@@ -251,7 +247,7 @@ class WinPygletGame(pyglet.window.Window):
                 self.oo.rx = float(self.oo.rx) + float(i)/80.
                 self.oo.ry = float(self.oo.ry) + float(j)/80.
 
-        elif buttons & mouse.RIGHT:
+        elif buttons & pyglet.window.mouse.RIGHT:
             if self.oo.name == 'world':
                 self.move_left(-dx) 
                 self.move_up(dy)              
@@ -308,28 +304,28 @@ class WinPygletGame(pyglet.window.Window):
         
     def on_key_press(self, symbol, modifiers):
 
-        if symbol == key.ESCAPE:
+        if symbol == pyglet.window.key.ESCAPE:
             self.reticle_select_mode = not self.reticle_select_mode
             self.set_exclusive_mouse(self.reticle_select_mode)
-        elif symbol == key.UP:
+        elif symbol == pyglet.window.key.UP:
             self.move_up(.1)
-        elif symbol == key.DOWN:
+        elif symbol == pyglet.window.key.DOWN:
             self.move_down(.1)
-        elif symbol == key.LEFT:
+        elif symbol == pyglet.window.key.LEFT:
             self.move_left(.1)
-        elif symbol == key.RIGHT:
+        elif symbol == pyglet.window.key.RIGHT:
             self.move_right(.1)
-        elif symbol == key._1:
+        elif symbol == pyglet.window.key._1:
             self.rotate3d(10)
             self.move_right(10)
-        elif symbol == key._2:
+        elif symbol == pyglet.window.key._2:
             self.rotate3d(-10)
             self.move_left(10)
-        elif symbol == key._3:
+        elif symbol == pyglet.window.key._3:
             self.fullRotate('left')
-        elif symbol == key._4:
+        elif symbol == pyglet.window.key._4:
             self.fullRotate('right')
-        elif symbol == key.TAB:
+        elif symbol == pyglet.window.key.TAB:
             self.selected_obj +=1
             if self.selected_obj >= len(self.map.objs):
                 self.selected_obj = 0
@@ -340,25 +336,25 @@ class WinPygletGame(pyglet.window.Window):
     def on_key_hold(self):
     
         # to move in diagonal directions
-        if key.UP in self.keys and key.LEFT in self.keys:
+        if pyglet.window.key.UP in self.keys and pyglet.window.key.LEFT in self.keys:
             self.move_up(.1)
             self.move_left(.1)
-        elif key.UP in self.keys and key.RIGHT in self.keys:
+        elif pyglet.window.key.UP in self.keys and pyglet.window.key.RIGHT in self.keys:
             self.move_up(.1)
             self.move_right(.1)
-        elif key.DOWN in self.keys and key.LEFT in self.keys:
+        elif pyglet.window.key.DOWN in self.keys and pyglet.window.key.LEFT in self.keys:
             self.move_down(.1)
             self.move_left(.1)
-        elif key.DOWN in self.keys and key.RIGHT in self.keys:
+        elif pyglet.window.key.DOWN in self.keys and pyglet.window.key.RIGHT in self.keys:
             self.move_down(.1)
             self.move_right(.1)
-        elif key.UP in self.keys:
+        elif pyglet.window.key.UP in self.keys:
             self.move_up(.1)
-        elif key.DOWN in self.keys:
+        elif pyglet.window.key.DOWN in self.keys:
             self.move_down(.1)
-        elif key.LEFT in self.keys:
+        elif pyglet.window.key.LEFT in self.keys:
             self.move_left(.1)
-        elif key.RIGHT in self.keys:
+        elif pyglet.window.key.RIGHT in self.keys:
             self.move_right(.1)
     
     
@@ -541,8 +537,7 @@ class WinPygletGame(pyglet.window.Window):
 
     
 if __name__ == '__main__':
-    from pyglet import gl
-    config = gl.Config(double_buffer=True)
+    config = pyglet.gl.Config(double_buffer=True)
     window = WinPygletGame(width=800, height=600, resizable=True, config=config, vsync = False, refreshrate=60)
     pyglet.app.run()
 
