@@ -133,6 +133,13 @@ class WinPygletGame(pyglet.window.Window):
         self.mousebuttons = {}  # for on_mousebutton_hold method
         
         
+        
+
+        self.start_press = 0    # on_key_press code to jump strafe
+        self.just_jumped = 0    # on_key_press code to jump strafe
+        self.lastbutton = None  # on_key_press code to jump strafe
+        
+        
         pyglet.clock.schedule_interval(self.update, 1/refreshrate)
         
         
@@ -303,18 +310,70 @@ class WinPygletGame(pyglet.window.Window):
             del self.keys[symbol]   # for on_key_hold method 
         
     def on_key_press(self, symbol, modifiers):
-
+        
+        ###############################
+        #
+        # code to jump strafe
+        #
+        ############## variables to set
+        jump_strafe = 5
+        threshold = .8              # this many seconds in between clicks 
+                                    #       of a double click to jump strafe 
+        wait_in_between_jumps = 2   # wait at least 2 seconds before allowing another jump
+        ##############
+        
+        time_clock = time.time()
+        jump_up = 0
+        jump_down = 0
+        jump_left = 0
+        jump_right = 0        
+        #print ('start_press:', self.start_press, '  time:', time_clock)
+        
+        if (self.start_press - self.just_jumped) > wait_in_between_jumps:
+        
+            if time_clock - self.start_press < threshold and self.lastbutton == symbol:
+                
+                if symbol == pyglet.window.key.UP:
+                    jump_up = jump_strafe
+                    print ('jump forward')
+                    self.just_jumped = time.time()
+                elif symbol == pyglet.window.key.DOWN:
+                    jump_down = jump_strafe
+                    print ('jump backward')
+                    self.just_jumped = time.time()
+                elif symbol == pyglet.window.key.LEFT:
+                    jump_left = jump_strafe
+                    print ('jump to side left')
+                    self.just_jumped = time.time()
+                elif symbol == pyglet.window.key.RIGHT:
+                    jump_right = jump_strafe
+                    print ('jump to side right')
+                    self.just_jumped = time.time()
+            else:
+                self.start_press = time_clock
+                self.lastbutton = symbol
+                jump_up = 0
+                jump_down = 0
+                jump_left = 0
+                jump_right = 0  
+        else:
+            self.start_press = time_clock
+        #
+        # end code to jump strafe
+        #
+        ###############################
+            
         if symbol == pyglet.window.key.ESCAPE:
             self.reticle_select_mode = not self.reticle_select_mode
             self.set_exclusive_mouse(self.reticle_select_mode)
         elif symbol == pyglet.window.key.UP:
-            self.move_up(.1)
+            self.move_up(.1+jump_up)
         elif symbol == pyglet.window.key.DOWN:
-            self.move_down(.1)
+            self.move_down(.1+jump_down)
         elif symbol == pyglet.window.key.LEFT:
-            self.move_left(.1)
+            self.move_left(.1+jump_left)
         elif symbol == pyglet.window.key.RIGHT:
-            self.move_right(.1)
+            self.move_right(.1+jump_right)
         elif symbol == pyglet.window.key._1:
             self.rotate3d(10)
             self.move_right(10)
@@ -532,8 +591,16 @@ class WinPygletGame(pyglet.window.Window):
         pass
     
     def terrain_collision_detection(self):
-        # temp, for now, no walking off map
-        self.position[1] = self.map.terrain.floor[int(self.position[0]), -int(self.position[2])]
+        cols = self.map.terrain.columns 
+        rows = self.map.terrain.rows
+        
+        x, y, z = self.position
+        
+        # in range of map
+        if int(x) > cols-1 or int(x) < 0 or -int(z) > cols-1 or -int(z) < 0:
+                self.position[1] = 0
+        else:
+            self.position[1] = self.map.terrain.floor[int(x), -int(z)]
 
     
 if __name__ == '__main__':
