@@ -8,6 +8,7 @@
 
 import pyglet
 from pyglet.gl import *
+from pyglet.window import key, mouse
 
 import sys
 sys.setrecursionlimit(10000)
@@ -35,6 +36,14 @@ from printfuncs import *
 from algorithms import *
 
 import numpy as np
+
+class MouseStateHandler(dict):
+    def on_mouse_press(self, x, y, button, modifiers):
+        self[button] = True
+    def on_mouse_release(self, x, y, button, modifiers):
+        self[button] = False
+    def __getitem__(self, key):
+        return self.get(key, False)
 
 
 class WorldMap(object):
@@ -133,6 +142,13 @@ class WinPygletGame(pyglet.window.Window):
         self.mousebuttons = {}      # for on_mousebutton_hold method
         
         
+        self.mousebuttons = MouseStateHandler()
+        self.push_handlers(self.mousebuttons)
+        
+        self.keyboard = key.KeyStateHandler()
+        self.push_handlers(self.keyboard)
+        
+        
         self.start_press = 0        # on_key_press code to jump strafe
         self.just_jumped = 0        # on_key_press code to jump strafe
         self.lastbutton = None      # on_key_press code to jump strafe
@@ -206,30 +222,24 @@ class WinPygletGame(pyglet.window.Window):
 
     def on_mouse_press(self, x, y, button, modifiers):
 
-        if button == pyglet.window.mouse.LEFT:
+        if button == mouse.LEFT:
             self.get_mouseclick_id(x, y)
             self.rotate = True
             
-        elif button == pyglet.window.mouse.MIDDLE:
+        elif button == mouse.MIDDLE:
 
             self.text = pyglet.text.HTMLLabel(
                 '<font face="Times New Roman" size="4">Hello, <i>World</i></font>',
                 x=x, y=y,
                 anchor_x='center', anchor_y='center')
             
-        elif button == pyglet.window.mouse.RIGHT:
+        elif button == mouse.RIGHT:
             self.move = True
-        
-        self.mousebuttons[button] = True    # for on_mousebutton_hold method 
         
             
     def on_mouse_release(self, x, y, button, modifiers):
         
-        if button in self.mousebuttons:     # for on_mousebutton_hold method 
-            del self.mousebuttons[button]   # for on_mousebutton_hold method 
-        
-        
-        if button == pyglet.window.mouse.LEFT:
+        if button == mouse.LEFT:
             self.rotate = False
             update_rotate_vals(self.oo)
 
@@ -240,9 +250,9 @@ class WinPygletGame(pyglet.window.Window):
             # if v == 1:
                 # print ('intersect (ray intersect triangle method):', v )
 
-        elif button == pyglet.window.mouse.MIDDLE:
+        elif button == mouse.MIDDLE:
             print ('middle button released')
-        elif button == pyglet.window.mouse.RIGHT:
+        elif button == mouse.RIGHT:
             self.move = False
             update_move_vals(self.oo)
     
@@ -252,11 +262,11 @@ class WinPygletGame(pyglet.window.Window):
         
     def on_mousebutton_hold(self):
     
-        if pyglet.window.mouse.LEFT in self.mousebuttons:
+        if self.mousebuttons[mouse.LEFT]:
             if self.x and self.y and self.rapidFire:
                 self.get_mouseclick_id(self.x, self.y)
         
-        if pyglet.window.mouse.RIGHT in self.mousebuttons:
+        if self.mousebuttons[mouse.RIGHT]:
             self.rapidFire = False
             if self.fViewDistance_x_z <= 55:
                 self.fViewDistance_x_z += 1
@@ -265,14 +275,14 @@ class WinPygletGame(pyglet.window.Window):
                 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         
-        if buttons & pyglet.window.mouse.LEFT:
+        if buttons & mouse.LEFT:
             i = x
             j = y
             if self.rotate:
                 self.oo.rx = float(self.oo.rx) + float(i)/80.
                 self.oo.ry = float(self.oo.ry) + float(j)/80.
 
-        elif buttons & pyglet.window.mouse.RIGHT:
+        elif buttons & mouse.RIGHT:
             # if self.oo.name == 'world':
                 # self.move_left(-dx) 
                 # self.move_up(dy)              
@@ -340,9 +350,9 @@ class WinPygletGame(pyglet.window.Window):
         
         
     def on_key_release(self, symbol, modifiers):
-        if symbol in self.keys:     # for on_key_hold method 
-            del self.keys[symbol]   # for on_key_hold method 
-        
+        #if symbol in self.keys:     # for on_key_hold method 
+        #    self.keys[symbol] = False   # for on_key_hold method 
+        pass
         
     def on_key_press(self, symbol, modifiers):
         
@@ -368,19 +378,19 @@ class WinPygletGame(pyglet.window.Window):
         
             if time_clock - self.start_press < threshold and self.lastbutton == symbol:
                 
-                if symbol == pyglet.window.key.UP:
+                if symbol == key.UP:
                     jump_up = jump_strafe
                     print ('jump forward')
                     self.just_jumped = time.time()
-                elif symbol == pyglet.window.key.DOWN:
+                elif symbol == key.DOWN:
                     jump_down = jump_strafe
                     print ('jump backward')
                     self.just_jumped = time.time()
-                elif symbol == pyglet.window.key.LEFT:
+                elif symbol == key.LEFT:
                     jump_left = jump_strafe
                     print ('jump to side left')
                     self.just_jumped = time.time()
-                elif symbol == pyglet.window.key.RIGHT:
+                elif symbol == key.RIGHT:
                     jump_right = jump_strafe
                     print ('jump to side right')
                     self.just_jumped = time.time()
@@ -398,57 +408,55 @@ class WinPygletGame(pyglet.window.Window):
         #
         ###############################
             
-        if symbol == pyglet.window.key.ESCAPE:
+        if symbol == key.ESCAPE:
             self.reticle_select_mode = not self.reticle_select_mode
             self.set_exclusive_mouse(self.reticle_select_mode)
-        elif symbol == pyglet.window.key.UP:
+        elif symbol == key.UP:
             self.move_up(.1+jump_up)
-        elif symbol == pyglet.window.key.DOWN:
+        elif symbol == key.DOWN:
             self.move_down(.1+jump_down)
-        elif symbol == pyglet.window.key.LEFT:
+        elif symbol == key.LEFT:
             self.move_left(.1+jump_left)
-        elif symbol == pyglet.window.key.RIGHT:
+        elif symbol == key.RIGHT:
             self.move_right(.1+jump_right)
-        elif symbol == pyglet.window.key._1:
+        elif symbol == key._1:
             self.rotate3d(10)
             self.move_right(10)
-        elif symbol == pyglet.window.key._2:
+        elif symbol == key._2:
             self.rotate3d(-10)
             self.move_left(10)
-        elif symbol == pyglet.window.key._3:
+        elif symbol == key._3:
             self.fullRotate('left')
-        elif symbol == pyglet.window.key._4:
+        elif symbol == key._4:
             self.fullRotate('right')
-        elif symbol == pyglet.window.key.TAB:
+        elif symbol == key.TAB:
             self.selected_obj +=1
             if self.selected_obj >= len(self.map.objs):
                 self.selected_obj = 0
             self.oo = self.map.objs[self.selected_obj]
         
-        self.keys[symbol] = True    # for on_key_hold method 
-        
     def on_key_hold(self):
     
         # to move in diagonal directions
-        if pyglet.window.key.UP in self.keys and pyglet.window.key.LEFT in self.keys:
+        if self.keyboard[key.UP] and self.keyboard[key.LEFT]:
             self.move_up(.1)
             self.move_left(.1)
-        elif pyglet.window.key.UP in self.keys and pyglet.window.key.RIGHT in self.keys:
+        elif self.keyboard[key.UP] and self.keyboard[key.RIGHT]:
             self.move_up(.1)
             self.move_right(.1)
-        elif pyglet.window.key.DOWN in self.keys and pyglet.window.key.LEFT in self.keys:
+        elif self.keyboard[key.DOWN] and self.keyboard[key.LEFT]:
             self.move_down(.1)
             self.move_left(.1)
-        elif pyglet.window.key.DOWN in self.keys and pyglet.window.key.RIGHT in self.keys:
+        elif self.keyboard[key.DOWN] and self.keyboard[key.RIGHT]:
             self.move_down(.1)
             self.move_right(.1)
-        elif pyglet.window.key.UP in self.keys:
+        elif self.keyboard[key.UP]:
             self.move_up(.1)
-        elif pyglet.window.key.DOWN in self.keys:
+        elif self.keyboard[key.DOWN]:
             self.move_down(.1)
-        elif pyglet.window.key.LEFT in self.keys:
+        elif self.keyboard[key.LEFT]:
             self.move_left(.1)
-        elif pyglet.window.key.RIGHT in self.keys:
+        elif self.keyboard[key.RIGHT]:
             self.move_right(.1)
     
     
