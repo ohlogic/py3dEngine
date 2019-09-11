@@ -316,7 +316,7 @@ class WinPygletGame(pyglet.window.Window):
         # code to jump strafe
         #
         ############## variables to set
-        jump_strafe = 5
+        jump_strafe = 3
         threshold = .8              # this many seconds in between clicks 
                                     #       of a double click to jump strafe 
         wait_in_between_jumps = 2   # wait at least 2 seconds before allowing another jump
