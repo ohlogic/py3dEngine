@@ -129,17 +129,24 @@ class WinPygletGame(pyglet.window.Window):
         if self.reticle_select_mode:
             self.set_exclusive_mouse(True)
         
-        self.keys = {}          # for on_key_hold method
-        self.mousebuttons = {}  # for on_mousebutton_hold method
+        self.keys = {}              # for on_key_hold method
+        self.mousebuttons = {}      # for on_mousebutton_hold method
         
         
+        self.start_press = 0        # on_key_press code to jump strafe
+        self.just_jumped = 0        # on_key_press code to jump strafe
+        self.lastbutton = None      # on_key_press code to jump strafe
         
+        
+        self.fViewDistance_x_z = 0  # for zoom glulookat
 
-        self.start_press = 0    # on_key_press code to jump strafe
-        self.just_jumped = 0    # on_key_press code to jump strafe
-        self.lastbutton = None  # on_key_press code to jump strafe
-        
-        
+
+        self.x = 0
+        self.y = 0
+        #self.dx = 0
+        #self.dy = 0
+        self.rapidFire = True
+
         pyglet.clock.schedule_interval(self.update, 1/refreshrate)
         
         
@@ -239,15 +246,26 @@ class WinPygletGame(pyglet.window.Window):
             self.move = False
             update_move_vals(self.oo)
     
+    
+            self.fViewDistance_x_z = 0
+            self.rapidFire = True
+        
     def on_mousebutton_hold(self):
+    
         if pyglet.window.mouse.LEFT in self.mousebuttons:
-            if self.x and self.y:
+            if self.x and self.y and self.rapidFire:
                 self.get_mouseclick_id(self.x, self.y)
+        
+        if pyglet.window.mouse.RIGHT in self.mousebuttons:
+            self.rapidFire = False
+            if self.fViewDistance_x_z <= 55:
+                self.fViewDistance_x_z += 1
 
+                
+                
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         
         if buttons & pyglet.window.mouse.LEFT:
-                
             i = x
             j = y
             if self.rotate:
@@ -255,19 +273,36 @@ class WinPygletGame(pyglet.window.Window):
                 self.oo.ry = float(self.oo.ry) + float(j)/80.
 
         elif buttons & pyglet.window.mouse.RIGHT:
-            if self.oo.name == 'world':
-                self.move_left(-dx) 
-                self.move_up(dy)              
-                return
-            i = dx
-            j = dy
-            if self.move:
-                self.oo.tx = float(self.oo.tx) + float(i)
-                self.oo.ty = float(self.oo.ty) + float(j)
+            # if self.oo.name == 'world':
+                # self.move_left(-dx) 
+                # self.move_up(dy)              
+                # return
+            # i = dx
+            # j = dy
+            # if self.move:
+                # self.oo.tx = float(self.oo.tx) + float(i)
+                # self.oo.ty = float(self.oo.ty) + float(j)
 
+
+            ###############################
+            # for zoom - same code as in on_mouse_motion
+            #
+            if self.reticle_select_mode:
+            
+                self.angle += dx/15.
+                self.angleYUpDown += dy/15.
+
+                #self.angle = self.angle % 360
+                self.angleYUpDown = max(-90, min(90, self.angleYUpDown))
+                
+                self.rotation[0] = self.angle
+                self.rotation[1] = self.angleYUpDown
+            ###############################
+            
     def on_mouse_motion(self, x, y, dx, dy):
-        self.x = x
-        self.y = y
+        self.x = x  # for on_mousebutton_hold, get_mouseclick_id
+        self.y = y  # for on_mousebutton_hold, get_mouseclick_id
+        
         if self.reticle_select_mode:
         
             self.angle += dx/20.
@@ -278,7 +313,6 @@ class WinPygletGame(pyglet.window.Window):
             
             self.rotation[0] = self.angle
             self.rotation[1] = self.angleYUpDown
-
             
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         print ('SCROLL', x, y, scroll_x, scroll_y)
@@ -309,6 +343,7 @@ class WinPygletGame(pyglet.window.Window):
         if symbol in self.keys:     # for on_key_hold method 
             del self.keys[symbol]   # for on_key_hold method 
         
+        
     def on_key_press(self, symbol, modifiers):
         
         ###############################
@@ -320,7 +355,7 @@ class WinPygletGame(pyglet.window.Window):
         threshold = .8              # this many seconds in between clicks 
                                     #       of a double click to jump strafe 
         wait_in_between_jumps = 2   # wait at least 2 seconds before allowing another jump
-        ##############
+        ###############################
         
         time_clock = time.time()
         jump_up = 0
@@ -417,7 +452,6 @@ class WinPygletGame(pyglet.window.Window):
             self.move_right(.1)
     
     
-        
     def fullRotate(self, direction):
         
         self.direction = direction 
@@ -494,7 +528,6 @@ class WinPygletGame(pyglet.window.Window):
         glPopMatrix()  
         
 
-
         glPushMatrix()
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) # add wiremesh
 
@@ -507,7 +540,6 @@ class WinPygletGame(pyglet.window.Window):
 
 
         self.on_key_hold()
-        
         
         self.set_2d()
         
@@ -556,18 +588,39 @@ class WinPygletGame(pyglet.window.Window):
         glLoadIdentity()
         gluPerspective(30.0, width / float(height), 1, 1000.0)
         glMatrixMode(GL_MODELVIEW)
-        #modelview = glGetFloatv(GL_MODELVIEW_MATRIX)
-        glLoadIdentity()
+        #modelview = glGetFloatv(GL_MODELVIEW_MATRIX)   # for Alternative
+        glLoadIdentity() 
         
+        ###############################
+        #  code for zoom 
+        ###############################
+        offset=0
+        flip = 1
+        if self.fViewDistance_x_z > 0:
+            glRotatef(180, 0,0,1)
+            glRotatef(180, 1,0,0)
+            offset = -135
+            flip = -1
+            gluLookAt(self.fViewDistance_x_z, 0, self.fViewDistance_x_z, 0,0,0,0,1,0)
+        ###############################
+
         gluLookAt(0, 0, 0, 
-            math.sin(math.radians(self.angle)), 
-            math.sin(math.radians(self.angleYUpDown)), 
-            math.cos(math.radians(self.angle)) * -1, 
+            math.sin(math.radians(self.angle+offset)), 
+            math.sin(math.radians(self.angleYUpDown*flip)), 
+            math.cos(math.radians(self.angle+offset)) * -1, 
             0, 1, 0)
-            
         glTranslatef(-self.position[0], -self.position[1], -self.position[2])
 
-        # alternative, also works
+
+        # Initial settings
+        ##################################################
+        # gluLookAt(0, 0, 0, 
+            # math.sin(math.radians(self.angle)), 
+            # math.sin(math.radians(self.angleYUpDown)), 
+            # math.cos(math.radians(self.angle)) * -1, 
+            # 0, 1, 0)
+        ##################################################
+        # Alternative, also works
         # x, y = self.rotation
         # glRotatef(x, 0, 1, 0)
         # glMultMatrixf(modelview)
@@ -607,5 +660,3 @@ if __name__ == '__main__':
     config = pyglet.gl.Config(double_buffer=True)
     window = WinPygletGame(width=800, height=600, resizable=True, config=config, vsync = False, refreshrate=60)
     pyglet.app.run()
-
-
