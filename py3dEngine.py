@@ -34,16 +34,11 @@ sys.path.append("./libs")
 from objloader_dbload import *
 from printfuncs import *
 from algorithms import *
+from easy_pyglet_addons import *    # MouseStateHandler
 
 import numpy as np
 
-class MouseStateHandler(dict):
-    def on_mouse_press(self, x, y, button, modifiers):
-        self[button] = True
-    def on_mouse_release(self, x, y, button, modifiers):
-        self[button] = False
-    def __getitem__(self, key):
-        return self.get(key, False)
+
 
 
 class WorldMap(object):
@@ -138,9 +133,6 @@ class WinPygletGame(pyglet.window.Window):
         if self.reticle_select_mode:
             self.set_exclusive_mouse(True)
         
-        self.keys = {}              # for on_key_hold method
-        self.mousebuttons = {}      # for on_mousebutton_hold method
-        
         
         self.mousebuttons = MouseStateHandler()
         self.push_handlers(self.mousebuttons)
@@ -172,8 +164,8 @@ class WinPygletGame(pyglet.window.Window):
         viewport     = glGetIntegerv(GL_VIEWPORT)
         matrixModelView  = glGetDoublev(GL_MODELVIEW_MATRIX)
         matrixProjection = glGetDoublev(GL_PROJECTION_MATRIX)
-        #print ('World coords at z=0 are', gluUnProject(x, realy, 0, matrixModelView, matrixProjection, viewport))
-        #print ('World coords at z=1 are', gluUnProject(x, realy, 1, matrixModelView, matrixProjection, viewport))
+        print ('World coords at z=0 are', gluUnProject(x, y, 0, matrixModelView, matrixProjection, viewport))
+        print ('World coords at z=1 are', gluUnProject(x, y, 1, matrixModelView, matrixProjection, viewport))
         p = []
         p.append(gluUnProject(x, y, 0, matrixModelView, matrixProjection, viewport))
         p.append(gluUnProject(x, y, 1, matrixModelView, matrixProjection, viewport))
@@ -244,7 +236,8 @@ class WinPygletGame(pyglet.window.Window):
             update_rotate_vals(self.oo)
 
             # self.set_3d()
-            # self.storeit = self.mouseLeftClick(x, y)
+            #self.storeit = self.mouseLeftClick(x, y)
+            # print (self.storeit)
             # v = ray_intersect_triangle(np.array(self.storeit[0]), np.array(self.storeit[1]), \
                 # np.array([[ 0.0, 1.0, 0.0], [-1.0,-1.0, 0.0],[ 1.0,-1.0, 0.0]]) )
             # if v == 1:
@@ -350,8 +343,6 @@ class WinPygletGame(pyglet.window.Window):
         
         
     def on_key_release(self, symbol, modifiers):
-        #if symbol in self.keys:     # for on_key_hold method 
-        #    self.keys[symbol] = False   # for on_key_hold method 
         pass
         
     def on_key_press(self, symbol, modifiers):
