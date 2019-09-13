@@ -2,6 +2,7 @@
 
 import pyglet
 from pyglet.gl import *
+import math
 
 class Texuture_Cube():
     def __init__(self):
@@ -81,3 +82,5 @@ class Texture_Triangle():
         glTexCoord2f(.5,.5)
         glVertex2f(1,-1)
         glEnd()
+
+
