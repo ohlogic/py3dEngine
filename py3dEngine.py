@@ -61,7 +61,6 @@ class WinPygletGame(pyglet.window.Window):
     def __init__(self, refreshrate=240, *args, **kwargs):
         super(WinPygletGame, self).__init__(*args, **kwargs)
         
-        
         self.refreshrate = refreshrate
         self.angle = 0
         self.angleYUpDown = 0
@@ -214,7 +213,7 @@ class WinPygletGame(pyglet.window.Window):
     def on_mouse_press(self, x, y, button, modifiers):
 
         if button == mouse.LEFT:
-            #self.get_mouseclick_id(x, y)
+            self.get_mouseclick_id(x, y)
             self.rotate = True
             
         elif button == mouse.MIDDLE:
@@ -251,7 +250,7 @@ class WinPygletGame(pyglet.window.Window):
             
         if self.mousebuttons[mouse.RIGHT]:
             self.rapidFire = False
-            if self.fViewDistance_x_z <= 55:
+            if self.fViewDistance_x_z <= 25:
             
                 self.fViewDistance_x_z += 1
                 
@@ -308,8 +307,6 @@ class WinPygletGame(pyglet.window.Window):
             self.rotation[0] = self.angle
             self.rotation[1] = self.angleYUpDown
             
-            self.set_3d()
-            self.s = self.changeCoordinates(self.x, self.y) 
             
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         print ('SCROLL', x, y, scroll_x, scroll_y)
@@ -445,14 +442,10 @@ class WinPygletGame(pyglet.window.Window):
         elif self.keyboard[key.RIGHT]:
             self.move_right(.1)
     
-    
     def fullRotate(self, direction):
-        
-        self.direction = direction 
-        
+
         for i in range(0, 360):
- 
-            if self.direction == 'left':
+            if direction == 'left':
                 self.angle += 1
                 self.move_left(1)
             else:
@@ -516,11 +509,9 @@ class WinPygletGame(pyglet.window.Window):
         glPopMatrix()
         
         
-        
         self.on_key_hold()
         
         self.set_2d()
-        
         
         x,y,z = self.position
         infotext = '%02d (%.2f, %.2f, %.2f)' % (
@@ -567,6 +558,10 @@ class WinPygletGame(pyglet.window.Window):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity() 
         
+        coords = self.pre_zoom_get_coords()
+        
+        glLoadIdentity()
+        
         ###############################
         #  code for zoom 
         ###############################
@@ -606,10 +601,16 @@ class WinPygletGame(pyglet.window.Window):
             
             glPushMatrix()
             glColor3f(2,2,2)
-            self.s = self.changeCoordinates(self.x, self.y) 
-            glTranslatef(0,0,2)
-            #glTranslatef(self.s[0][0],self.s[0][1],2)
             
+            #glTranslatef(0,0,2)
+            glTranslatef(coords[0],coords[1],coords[2])
+            
+            # to make the circle perpendicular to the camera, needs a fix
+            long   = math.atan2(coords[0], coords[2])
+            
+            glRotatef(math.degrees(long), 0, 1, 0)
+
+
             radius = 5
             quad = gluNewQuadric()
             gluDisk(quad, 0.0, radius, 64, 1)
@@ -638,6 +639,40 @@ class WinPygletGame(pyglet.window.Window):
         self.on_draw()
         pass
     
+    def pre_zoom_get_coords(self):
+    
+        ###############################
+        #  code for zoom get coords, performs an not displayed zoom to get coords
+        ###############################
+        temp = self.fViewDistance_x_z
+        self.fViewDistance_x_z = 100    # i set a point beyond the zoom distance
+
+        offset=0
+        flip = 1
+        if self.fViewDistance_x_z > 0:
+            glRotatef(180, 0,0,1)
+            glRotatef(180, 1,0,0)
+            offset = -135
+            flip = -1
+            gluLookAt(self.fViewDistance_x_z, 0, self.fViewDistance_x_z, 0,0,0,0,1,0)
+        
+        gluLookAt(0, 0, 0, 
+            math.sin(math.radians(self.angle+offset)), 
+            math.sin(math.radians(self.angleYUpDown*flip)), 
+            math.cos(math.radians(self.angle+offset)) * -1, 
+            0, 1, 0)
+        glTranslatef(-self.position[0], -self.position[1], -self.position[2])
+        
+        viewport     = glGetIntegerv(GL_VIEWPORT)
+        modelMatrix  = glGetDoublev(GL_MODELVIEW_MATRIX)
+        projMatrix = glGetDoublev(GL_PROJECTION_MATRIX)
+
+        coords = gluUnProject(self.x, viewport[1] + viewport[3] - self.y, 0, modelMatrix, projMatrix, viewport)
+        self.fViewDistance_x_z = temp
+        ###############################
+        
+        return coords
+    
     def terrain_collision_detection(self):
         cols = self.map.terrain.columns 
         rows = self.map.terrain.rows
@@ -646,9 +681,9 @@ class WinPygletGame(pyglet.window.Window):
         
         # in range of map
         if int(x) > cols-1 or int(x) < 0 or -int(z) > cols-1 or -int(z) < 0:
-                self.position[1] = 0
+                self.position[1] = 0 # just goes off the map
         else:
-            self.position[1] = self.map.terrain.floor[int(x), -int(z)]
+            self.position[1] = self.map.terrain.floor[int(x), -int(z)] # adjusts height to map terrain
 
     
 if __name__ == '__main__':
