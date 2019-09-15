@@ -464,57 +464,56 @@ class WinPygletGame(pyglet.window.Window):
 
         self.set_3d()
         
-        if not self.fViewDistance_x_z  == 24:
-            
-            glColor3d(1, 1, 1)
-            
-            #glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) # add wiremesh mode
 
-            glBindTexture(GL_TEXTURE_2D, 0) # to reset colors one way is to bind the default texture
-            
-            self.map.draw_objs(self)
-            
-            #glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) #remove wiremesh mode
-            
-            glut_print(0, self.height-10, self.oo.name)
-            
-
-            glPushMatrix()
-            glEnable(GL_TEXTURE_2D)
-            glBindTexture(GL_TEXTURE_2D, self.texture.id)
-            Texture_Triangle.draw() 
-            glDisable(GL_TEXTURE_2D)
-            glPopMatrix()
-            
-            
-            glPushMatrix()
-            glEnable(GL_TEXTURE_2D)
-            glTranslatef(10, 0, 0)
-            glBindTexture (GL_TEXTURE_2D, self.texture.id)
-            Texuture_Square.draw()
-            glDisable(GL_TEXTURE_2D)
-            glPopMatrix()
-            
-            
-            glPushMatrix()
-            glTranslatef(5, 0, 0)
-            glEnable(GL_TEXTURE_2D)
-            glBindTexture(GL_TEXTURE_2D, self.texture.id)
-            Texuture_Cube.draw()
-            glDisable(GL_TEXTURE_2D)
-            glPopMatrix()  
-            
-
-            glPushMatrix()
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) # add wiremesh
-
-            glTranslatef(0,-5,0)
-            glRotatef(-90, 1.0, .0, 0.0 )
-
-            glCallList(self.map.terrain.drawTerrain)
-            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) # remove wiremesh
-            glPopMatrix()
+        glColor3d(1, 1, 1)
         
+        #glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) # add wiremesh mode
+
+        glBindTexture(GL_TEXTURE_2D, 0) # to reset colors one way is to bind the default texture
+        
+        self.map.draw_objs(self)
+        
+        #glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) #remove wiremesh mode
+        
+        glut_print(0, self.height-10, self.oo.name)
+        
+
+        glPushMatrix()
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, self.texture.id)
+        Texture_Triangle.draw() 
+        glDisable(GL_TEXTURE_2D)
+        glPopMatrix()
+        
+        
+        glPushMatrix()
+        glEnable(GL_TEXTURE_2D)
+        glTranslatef(10, 0, 0)
+        glBindTexture (GL_TEXTURE_2D, self.texture.id)
+        Texuture_Square.draw()
+        glDisable(GL_TEXTURE_2D)
+        glPopMatrix()
+        
+        
+        glPushMatrix()
+        glTranslatef(5, 0, 0)
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, self.texture.id)
+        Texuture_Cube.draw()
+        glDisable(GL_TEXTURE_2D)
+        glPopMatrix()  
+        
+
+        glPushMatrix()
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) # add wiremesh
+
+        glTranslatef(0,-5,0)
+        glRotatef(-90, 1.0, .0, 0.0 )
+
+        glCallList(self.map.terrain.drawTerrain)
+        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) # remove wiremesh
+        glPopMatrix()
+    
         
         self.on_key_hold()
         
@@ -525,107 +524,37 @@ class WinPygletGame(pyglet.window.Window):
             pyglet.clock.get_fps(), x, y, z)
             
             
-        if not self.fViewDistance_x_z  == 24:
-            
-            drawText((self.width-500, self.height-30, 0), infotext)
-            glut_print(0, self.height-35, "Toggle: ESC - to show/hide mouse")
-            
-            glut_print(0, self.height-55, str(self.rotation))
+        drawText((self.width-500, self.height-30, 0), infotext)
+        glut_print(0, self.height-35, "Toggle: ESC - to show/hide mouse")
         
-        
-        # to make the circle perpendicular to the camera, needs a fix, 
-        # therefore I use this 2d circle stencil
-        
-        if self.fViewDistance_x_z == 24:
-            
-            glClear(GL_STENCIL_BUFFER_BIT)
-            #glClearColor(0.902, 0.902, 1, 0.0)
-            glClearColor(0, 0, 0, 0.0)
-
-            glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE )
-
-            glEnable( GL_STENCIL_TEST )
-
-            gl.glStencilFunc(GL_ALWAYS, 1, 255)
-            gl.glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE)
-                    
-            
-            glStencilMask(255)
-            
-            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE)
-            
-
-            
-            
-            glPushMatrix()
-            glColor3f(1,1,1)
-            glBegin(GL_TRIANGLE_FAN)
-            
-            x1 = self.width//2
-            y1 = self.height//2
-            glVertex2f(x1,y1)
-        
-            radius = 50
-            for angle in np.arange(1,20, 0.2):
-                x2 = x1+math.sin(angle)*radius
-                y2 = y1+math.cos(angle)*radius
-                glVertex2f(x2,y2)
-            glEnd()
-            glPopMatrix()
-            
-            
-            glStencilFunc(GL_EQUAL, 1, 255)
-            glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP )
+        glut_print(0, self.height-55, str(self.rotation))
 
 
-
-            glColor3f(1,1,1)
-            glBegin(GL_TRIANGLE_FAN)
-            x1 = self.width//2
-            y1 = self.height//2
-            radius = 49
-            for angle in np.arange(1,25, 0.2):
-                x2 = x1+math.sin(angle)*radius
-                y2 = y1+math.cos(angle)*radius
-                glVertex2f(x2,y2)
-            glEnd()
-
-        # put an outline around the zoom
         if self.fViewDistance_x_z > 0:
             glColor3f(1,1,1)
             glBegin(GL_TRIANGLE_STRIP)
             x1 = self.width//2
             y1 = self.height//2
             radius = 49
-            for angle in np.arange(1,25, 0.2):
+            for angle in np.arange(1, 25, 0.2):
                 x2 = x1+math.sin(angle)*radius
                 y2 = y1+math.cos(angle)*radius
                 glVertex2f(x2,y2)
             glEnd()
-
-
-        # color of recticle
-        if self.fViewDistance_x_z > 0:
-            glColor3d(0, 1, 0)
-        else:
-            glColor3d(0, 0, 0)
-        
         
         if self.reticle_select_mode:
             self.draw_reticle()
             
             # type of recticle for zoom
             if self.fViewDistance_x_z > 0:
+                    glColor3d(0, 1, 0)
                     x, y = self.width // 2, self.height // 2
                     n = 45
                     pyglet.graphics.vertex_list(4,
                     ('v2i', (x - n, y, x + n, y, x, y - n, x, y + n))).draw(GL_LINES)
         
-        
         if self.text:
             self.text.draw()
-
-
 
     def set_2d(self):
         """ Configure OpenGL to draw in 2d.
@@ -656,8 +585,6 @@ class WinPygletGame(pyglet.window.Window):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity() 
         
-        coords = self.pre_zoom_get_coords()
-        
         glLoadIdentity()
         
         ###############################
@@ -680,61 +607,11 @@ class WinPygletGame(pyglet.window.Window):
             0, 1, 0)
         glTranslatef(-self.position[0], -self.position[1], -self.position[2])
         
-
-       
-
-        if self.fViewDistance_x_z > 0 and not self.fViewDistance_x_z > 24:
-            
-            glClear(GL_STENCIL_BUFFER_BIT)
-            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-
-            glClearColor(0, 0, 0, 0.0)
-
-            glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE )
-
-            glEnable( GL_STENCIL_TEST )
-            glStencilFunc(GL_ALWAYS, 1, 1)
-            glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE)
-            
-            glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE )
-            
-            glPushMatrix()
-            glColor3d(2,2,2)
-            
-            glTranslatef(coords[0],coords[1],coords[2])
-            
-            # to make the circle perpendicular to the camera, needs a fix, 
-            # therefore I use 2d circle
-            long   = math.atan2(coords[0], coords[2])
-            self.long = long
-            
-            glRotatef(math.degrees(long), 0, 1, 0)
-            #glRotatef(long*180.0 / math.pi, 0, 1, 0)
-
-
-            radius = 5
-            quad = gluNewQuadric()
-            gluDisk(quad, 0.0, radius, 64, 1)
-            gluDeleteQuadric(quad)
-            glPopMatrix()
-            
-            glStencilFunc( GL_EQUAL, 1, 1 )
-            glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP )
-            
-        else:
-            
-            if not self.fViewDistance_x_z > 24:
-                glClearColor(0.902, 0.902, 1, 0.0)
-                glDisable(GL_STENCIL_TEST);
-
-
-
-
-
+        
     def draw_reticle(self):
         """ Draw the crosshairs in the center of the screen.
         """
-        #glColor3d(0, 0, 0)
+        glColor3d(0, 0, 0)
         self.reticle.draw(GL_LINES)
         
     def on_resize(self, width, height):
@@ -745,40 +622,6 @@ class WinPygletGame(pyglet.window.Window):
         self.terrain_collision_detection()
         self.on_draw()
         pass
-    
-    def pre_zoom_get_coords(self):
-    
-        ###############################
-        #  code for zoom get coords, performs an not displayed zoom to get coords
-        ###############################
-        temp = self.fViewDistance_x_z
-        self.fViewDistance_x_z = 100    # i set a point beyond the zoom distance
-
-        offset=0
-        flip = 1
-        if self.fViewDistance_x_z > 0:
-            glRotatef(180, 0,0,1)
-            glRotatef(180, 1,0,0)
-            offset = -135
-            flip = -1
-            gluLookAt(self.fViewDistance_x_z, 0, self.fViewDistance_x_z, 0,0,0,0,1,0)
-        
-        gluLookAt(0, 0, 0, 
-            math.sin(math.radians(self.angle+offset)), 
-            math.sin(math.radians(self.angleYUpDown*flip)), 
-            math.cos(math.radians(self.angle+offset)) * -1, 
-            0, 1, 0)
-        glTranslatef(-self.position[0], -self.position[1], -self.position[2])
-        
-        viewport     = glGetIntegerv(GL_VIEWPORT)
-        modelMatrix  = glGetDoublev(GL_MODELVIEW_MATRIX)
-        projMatrix = glGetDoublev(GL_PROJECTION_MATRIX)
-
-        coords = gluUnProject(self.x, viewport[1] + viewport[3] - self.y, 0, modelMatrix, projMatrix, viewport)
-        self.fViewDistance_x_z = temp
-        ###############################
-        
-        return coords
     
     def terrain_collision_detection(self):
         cols = self.map.terrain.columns 
@@ -792,8 +635,8 @@ class WinPygletGame(pyglet.window.Window):
         else:
             self.position[1] = self.map.terrain.floor[int(x), -int(z)] # adjusts height to map terrain
 
-    
+
 if __name__ == '__main__':
-    config = pyglet.gl.Config(double_buffer=True, stencil_size=8)
+    config = pyglet.gl.Config(double_buffer=True)
     window = WinPygletGame(width=800, height=600, resizable=True, config=config, vsync = False, refreshrate=60)
     pyglet.app.run()
