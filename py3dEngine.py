@@ -48,7 +48,7 @@ class WorldMap(object):
         exec( generate_objs_list() )    # for dynamic code generation of n objects list
        
         self.terrain = Terrain_Floor(100,100)
-        self.terrain.load()
+        self.terrain.init_load()
 
        
     def draw_objs(self, window):
@@ -61,7 +61,7 @@ class WinPygletGame(pyglet.window.Window):
     def __init__(self, refreshrate=240, *args, **kwargs):
         super(WinPygletGame, self).__init__(*args, **kwargs)
         
-        self.long = 0
+        self.icoords = [0,0]
         
         self.refreshrate = refreshrate
         self.angle = 0
@@ -299,6 +299,7 @@ class WinPygletGame(pyglet.window.Window):
         self.dx = dx
         self.dy = dy
         
+
         if self.reticle_select_mode:
         
             self.angle += dx/20.
@@ -422,6 +423,9 @@ class WinPygletGame(pyglet.window.Window):
                 self.selected_obj = 0
             self.oo = self.map.objs[self.selected_obj]
         
+        
+
+        
     def on_key_hold(self):
     
         # to move in diagonal directions
@@ -445,6 +449,9 @@ class WinPygletGame(pyglet.window.Window):
             self.move_left(.1)
         elif self.keyboard[key.RIGHT]:
             self.move_right(.1)
+    
+        self.icoords = self.map.terrain.coords_to_indices(self.position[0], -self.position[2])
+            
     
     def fullRotate(self, direction):
 
@@ -504,16 +511,7 @@ class WinPygletGame(pyglet.window.Window):
         glPopMatrix()  
         
 
-        glPushMatrix()
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) # add wiremesh
-
-        glTranslatef(0,-5,0)
-        glRotatef(-90, 1.0, .0, 0.0 )
-
-        glCallList(self.map.terrain.drawTerrain)
-        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) # remove wiremesh
-        glPopMatrix()
-    
+        self.map.terrain.draw()
         
         self.on_key_hold()
         
@@ -528,6 +526,8 @@ class WinPygletGame(pyglet.window.Window):
         glut_print(0, self.height-35, "Toggle: ESC - to show/hide mouse")
         
         glut_print(0, self.height-55, str(self.rotation))
+
+        glut_print(0, self.height-75, ('terrain indices from coords:'+ str(self.icoords) ))
 
 
         if self.fViewDistance_x_z > 0:
@@ -621,7 +621,6 @@ class WinPygletGame(pyglet.window.Window):
         self.on_mousebutton_hold()      # for rapid fire, working
         self.terrain_collision_detection()
         self.on_draw()
-        pass
     
     def terrain_collision_detection(self):
         cols = self.map.terrain.columns 
@@ -629,12 +628,13 @@ class WinPygletGame(pyglet.window.Window):
         
         x, y, z = self.position
         
-        # in range of map
-        if int(x) > cols-1 or int(x) < 0 or -int(z) > cols-1 or -int(z) < 0:
-                self.position[1] = 0 # just goes off the map
+        if self.map.terrain.all_floors[self.icoords[0],self.icoords[1]] != None:
+            # adjusts height to map terrain
+            self.position[1] = self.map.terrain.all_floors[self.icoords[0],self.icoords[1]].floor[int(x), -int(z)]
         else:
-            self.position[1] = self.map.terrain.floor[int(x), -int(z)] # adjusts height to map terrain
-
+            self.position[1] = 0
+    
+        self.map.terrain.walk_on_create_floor( int(x), -int(z) )
 
 if __name__ == '__main__':
     config = pyglet.gl.Config(double_buffer=True)
