@@ -48,8 +48,7 @@ class WorldMap(object):
         exec( generate_objs_list() )    # for dynamic code generation of n objects list
        
         self.terrain = Terrain_Floor(100,100)
-        self.terrain.init_load()
-
+        
        
     def draw_objs(self, window):
 

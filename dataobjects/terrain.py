@@ -16,25 +16,26 @@ class Ground():
     def __init__(self, floor):
         self.floor = floor
 
-
+        
 class Terrain_Floor():
     
     columns = 0
     rows = 0
     
     all_floors = np.empty((100, 100), dtype=object)
+    all_coords = []
+    
     
     def __init__(self, cols, rows):
-        
-        floor = self.create_floor(cols, rows)
-        self.all_floors[0,0] = Ground(floor)
-        
+        self.walk_on_create_floor(0,0)
+
         
     def create_floor(self, cols, rows):
         self.columns = cols
         self.rows = rows
         
         floor_area = {}
+        
         yoff = 0
         for y in range (0, rows):
             xoff = 0
@@ -44,37 +45,12 @@ class Terrain_Floor():
             yoff += 0.1
             
         return floor_area
-
-    # just for origin floor
-    def init_load(self):
-        DrawTerrain=glGenLists(1)
-        glNewList(DrawTerrain,GL_COMPILE)
-        
-        for y in range (0, self.rows-1):
-            glBegin(GL_TRIANGLE_STRIP)
-            for x in range (0, self.columns):
-                
-                # testing, color coded beginning, end of map
-                if y > 90 and x > 90:
-                    glColor3f(1.0, 0.0, 0.0) #red
-                elif y <= 3 and x <= 3:
-                    glColor3f(0.0, 1.0, 0.0) #green
-                else:
-                    glColor3f(0.0, 1.0, 1.0) #cyan default color
-                    
-                glVertex3f(x, y, self.all_floors[0,0].floor[x,y])
-                glVertex3f(x, y+1, self.all_floors[0,0].floor[x,y+1])
-            glEnd()
-            
-        self.all_floors[0,0].drawTerrain = DrawTerrain
-        glEndList()
         
         
-    def create_floor_genList(self):
+    def create_floor_genList(self, icoords_x, icoords_z):
     
         DrawTerrain=glGenLists(1)
         glNewList(DrawTerrain,GL_COMPILE)
-        
         
         offone_y = 0
         if self.columns > 100:
@@ -84,16 +60,23 @@ class Terrain_Floor():
         if self.rows > 100:
             offone_x = 1
         
-        
         for y in range (self.rows-100-offone_x, self.rows-1):
             glBegin(GL_TRIANGLE_STRIP)
             for x in range (self.columns-100-offone_y, self.columns):
-                glColor3f(0.0, 1.0, 0.0)
-                glVertex3f(x, y, self.all_floors[self.icoords[0],self.icoords[1]].floor[x,y])
-                glVertex3f(x, y+1, self.all_floors[self.icoords[0],self.icoords[1]].floor[x,y+1])
+            
+                if (y > 90 and y <= 100) and (x > 90 and x <= 100):
+                    glColor3f(1.0, 0.0, 0.0) # red
+                elif y <= 3 and x <= 3:
+                    glColor3f(0.0, 0.0, 1.0) # blue
+                elif (y > 3 and y < 90) or (x > 3 and x < 90):
+                    glColor3f(0.0, 1.0, 1.0) # cyan 
+                else:
+                    glColor3f(0.0, 1.0, 0.0) # green
+                    
+                glVertex3f(x, y, self.all_floors[ icoords_x, icoords_z ].floor[x,y])
+                glVertex3f(x, y+1, self.all_floors[ icoords_x, icoords_z ].floor[x,y+1])
             glEnd()
-        #self.drawTerrain = DrawTerrain
-        self.all_floors[self.icoords[0],self.icoords[1]].drawTerrain = DrawTerrain
+        self.all_floors[ icoords_x, icoords_z ].drawTerrain = DrawTerrain
         glEndList()
         
 
@@ -107,51 +90,30 @@ class Terrain_Floor():
     
     def walk_on_create_floor(self, x, z):
         
-        self.icoords = self.coords_to_indices(x, z)
-        
+        icoords = self.coords_to_indices(x, z)
+
         create = False
-        if self.all_floors[self.icoords[0],self.icoords[1]] == None:
+        if self.all_floors[icoords[0],icoords[1]] == None:
             create = True
 
         if create:
-            self.all_floors[self.icoords[0],self.icoords[1]] = Ground( self.create_floor( 
-                100*(self.icoords[0]+1),
-                100*(self.icoords[1]+1) ) )
+            self.all_floors[icoords[0],icoords[1]] = Ground( 
+                self.create_floor( 100*(icoords[0]+1), 100*(icoords[1]+1) ) )
                 
-            self.create_floor_genList()
+            self.create_floor_genList( icoords[0] , icoords[1] )
             
-        
+            self.all_coords.append( (icoords[0] , icoords[1]) )
+            
     def draw(self):
-    
-        icoords = self.icoords
-        startx = 0
-        starty = 0
-        max_floor_display  = 4
         
-        # a test of not loading floors that are not in range
-        if icoords[0] > max_floor_display or icoords[1] > max_floor_display:
-            
-            if icoords[0] > max_floor_display//2:
-                startx = icoords[0] - 2
-            
-            if icoords[1] > max_floor_display//2:
-                starty = icoords[1] - 2
-        #########################################
-        
-        for i in range(startx, 100): # otherwise 0, 100
-            if self.all_floors[i,0] == None:
-                break
-            for j in range(starty, 100): # otherwise 0, 100
-                if self.all_floors[i,j] == None:
-                    continue
-                else:
-                    glPushMatrix()
-                    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) # add wiremesh
+        for i in range (0, len(self.all_coords)):
+            glPushMatrix()
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) # add wiremesh
 
-                    glTranslatef(0,-5,0)
-                    glRotatef(-90, 1.0, .0, 0.0 )
+            glTranslatef(0,-5,0)
+            glRotatef(-90, 1.0, .0, 0.0 )
 
-                    glCallList(self.all_floors[i,j].drawTerrain)
-                    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) # remove wiremesh
-                    glPopMatrix()    
+            glCallList(self.all_floors[ self.all_coords[i][0], self.all_coords[i][1] ].drawTerrain)
+            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL ) # remove wiremesh
+            glPopMatrix()    
 
