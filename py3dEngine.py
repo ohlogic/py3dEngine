@@ -285,7 +285,7 @@ class WinPygletGame(pyglet.window.Window):
                 self.angle += dx/15.
                 self.angleYUpDown += dy/15.
 
-                #self.angle = self.angle % 360
+                self.angle = self.angle % 360
                 self.angleYUpDown = max(-90, min(90, self.angleYUpDown))
                 
                 self.rotation[0] = self.angle
@@ -304,7 +304,7 @@ class WinPygletGame(pyglet.window.Window):
             self.angle += dx/20.
             self.angleYUpDown += dy/20.
 
-            #self.angle = self.angle % 360
+            self.angle = self.angle % 360
             self.angleYUpDown = max(-90, min(90, self.angleYUpDown))
             
             self.rotation[0] = self.angle

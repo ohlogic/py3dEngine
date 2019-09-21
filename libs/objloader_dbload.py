@@ -3,12 +3,15 @@ from OpenGL.GL import *
 
 import os.path
 from os import path
-
 from db import *
+
+import requests
 
 import io
 
 import copy
+
+WEBSITE_RETRIEVE = True
 
 def MTLdb(filename, x):
     contents = {}
@@ -16,6 +19,17 @@ def MTLdb(filename, x):
     
     if path.exists(filename):
         fpp = open(filename, "r")
+    elif WEBSITE_RETRIEVE:
+        req = 'http://oasisonlineshop.com/get_oasis_object.py?dataname=mtl&objectname=%s' % x
+        r = requests.get(req)
+        if r.status_code != 200:
+            print ('website not running...cannot retrieve objects')
+            sys.exit(1)
+            
+        startline = '\n<html><head><meta charset="UTF-8"></head><body>'
+        if r.text.startswith(startline):
+            fpp = io.StringIO(r.text[len(startline):])
+
     else:
         cur = db.cursor(MySQLdb.cursors.DictCursor)
         cur.execute('SELECT mtl FROM worldmap_objects WHERE objectname = "%s";' % x)
@@ -65,9 +79,19 @@ class OBJdb:
 
         material = None
         
-
+        row={}
         if path.exists(filename):
             fp = open(filename, "r")
+        elif WEBSITE_RETRIEVE:
+            req = 'http://oasisonlineshop.com/get_oasis_object.py?dataname=data&objectname=%s' % filename
+            r = requests.get(req)
+            if r.status_code != 200:
+                print ('website not running...cannot retrieve objects')
+                sys.exit(1)
+                
+            fp = io.StringIO(r.text)
+            row['objectname'] = filename
+            
         else:
             cur = db.cursor(MySQLdb.cursors.DictCursor)
             cur.execute('SELECT objectname, data FROM worldmap_objects WHERE objectname = "%s";' % filename)
@@ -162,7 +186,7 @@ class OBJ100(OBJdb):
         self.name = name
         self.id = id
 
-# added just to move around the world with mouse      
+# added just to move around the world with mouse
 class OBJworld():
     def __init__(self,x,swapyz, name, id, rx, ry, tx, ty):
         self.rx = rx

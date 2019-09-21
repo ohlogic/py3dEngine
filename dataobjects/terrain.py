@@ -68,7 +68,7 @@ class Terrain_Floor():
                     glColor3f(1.0, 0.0, 0.0) # red
                 elif y <= 3 and x <= 3:
                     glColor3f(0.0, 0.0, 1.0) # blue
-                elif (y > 3 and y < 90) or (x > 3 and x < 90):
+                elif (y >= 0 and y < 100) and (x >= 0 and x < 100):
                     glColor3f(0.0, 1.0, 1.0) # cyan 
                 else:
                     glColor3f(0.0, 1.0, 0.0) # green
