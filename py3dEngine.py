@@ -43,10 +43,8 @@ class WorldMap(object):
     def __init__(self):
         super().__init__()
 
-        exec( generate_objs() )         # for dynamic code generation of n objects
-
-        exec( generate_objs_list() )    # for dynamic code generation of n objects list
-       
+        self.objs = generate_objs_list()
+        
         self.terrain = Terrain_Floor(100,100)
         
        

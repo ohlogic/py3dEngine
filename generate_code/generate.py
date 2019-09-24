@@ -6,30 +6,31 @@ import sys
 sys.path.insert(0, "./db")
 from db import *
 
-def generate_objs():
-    cur = db.cursor(MySQLdb.cursors.DictCursor)
-    cur.execute('SELECT * FROM worldmap_objects ORDER BY id ASC;')
-    str1 = ""
-    count = 0
-    for row in cur.fetchall():
-        str1 += 'self.obj%s = OBJ100("%s", swapyz=True, name="%s", id="%s", rx="%s", ry="%s", tx="%s", ty="%s");\n' % \
-        (count, row['objectname'], row['objectname'].split(".")[0], row['id'], row['rx'], row['ry'], row['tx'], row['ty'])
-        count += 1
-    return str1
+sys.path.append("./libs")
+from objloader_dbload import *      # without database, use the objloader.py
+
 
 def generate_objs_list():
     cur = db.cursor(MySQLdb.cursors.DictCursor)
     cur.execute('SELECT * FROM worldmap_objects ORDER BY id ASC;')
-    str1 = "self.objs = ["
+    
+    objs = []
     count = 0
     for row in cur.fetchall():
-        str1 += 'self.' + 'obj' + str(count) + ','
-        count +=1
-
-    if len(row) > 0:
-        str1 = str1[:-1] # remove last comma
-    str1 += ']'
-    return str1
+        objs.append(  
+            OBJ100(
+                row['objectname'],
+                swapyz=True, 
+                name=row['objectname'].split(".")[0], 
+                id=str(row['id']), 
+                rx=str(row['rx']), 
+                ry=str(row['ry']), 
+                tx=str(row['tx']), 
+                ty=str(row['ty'])
+            )
+        )
+    return objs
+    
 
 def generate_obj_matrix(winpg):
     cur = db.cursor(MySQLdb.cursors.DictCursor)
@@ -54,7 +55,7 @@ def generate_obj_matrix(winpg):
             glRotatef(float(winpg.map.objs[count].rx), 1, 0, 0)
             glRotatef(float(winpg.map.objs[count].ry), 0, 1, 0)
 
-        str1 = "glCallList(winpg.map.obj"+str(count)+".gl_list);"
+        str1 = "glCallList(winpg.map.objs["+str(count)+"].gl_list);"
         exec ( str1 )
         glPopMatrix()
         count +=1

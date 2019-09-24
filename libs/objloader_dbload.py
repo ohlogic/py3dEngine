@@ -24,7 +24,6 @@ def MTLdb(filename, x):
         r = requests.get(req)
         if r.status_code != 200:
             print ('website not running...cannot retrieve objects')
-            sys.exit(1)
             
         startline = '\n<html><head><meta charset="UTF-8"></head><body>'
         if r.text.startswith(startline):
@@ -87,7 +86,6 @@ class OBJdb:
             r = requests.get(req)
             if r.status_code != 200:
                 print ('website not running...cannot retrieve objects')
-                sys.exit(1)
                 
             fp = io.StringIO(r.text)
             row['objectname'] = filename
@@ -175,6 +173,7 @@ class OBJdb:
         glDisable(GL_TEXTURE_2D)
         glEndList()
         print ('Loading objs Done.')
+        
         
 class OBJ100(OBJdb):
     def __init__(self,x,swapyz, name, id, rx, ry, tx, ty):
