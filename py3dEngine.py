@@ -582,8 +582,6 @@ class WinPygletGame(pyglet.window.Window):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity() 
         
-        glLoadIdentity()
-        
         ###############################
         #  code for zoom 
         ###############################
